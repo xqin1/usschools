@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+body,
+svg {
+  height: 100%;
+  margin: 0;
+  width: 100%;
+  float: left;
+}
+
+path {
+  fill: none;
+  stroke-linejoin: round;
+}
+
+.state {
+  fill: #ccc;
+  fill-opacity:0;
+  cursor:pointer;
+}
+.state-boundary {
+        fill: none;
+        stroke: #fff;
+        stroke-width:1px;
+        pointer-events: none;
+}
+</style>
+<body>
+<div id="title">
+	<h2>Schools Total Disbursements by State</h2>
+</div>
+<div>
+	<h3>Funding Year 2009: July 1, 2009 through June 30, 2010</h3>
+</div>
+<div id="map"></div>
+							
+<<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="http://d3js.org/topojson.v0.min.js"></script>
+<script src="http://d3js.org/queue.v1.min.js"></script>
+<script src="js/simple_statistics.js"></script>
+
+<script>
+
+var width = 800,
+    height = 600;
+var format = d3.format(",");
+//var projection = albersUsa();
+var projection = d3.geo.albersUsa();
+var path = d3.geo.path()
+    .projection(projection);
+
+var color = d3.scale.threshold()
+   // .domain(ss.jenks(school.map(function(d) { return +d.Total; }), 6))
+    .range(["#F2F0F7", "#DADAEB", "#BCBDDC", "#9E9AC8", "#807DBA", "#6A51A3", "#4A1486"]);
+
+var svg = d3.select("#map").append("svg")
+   // .attr("viewBox", "0 0 " + width + " " + height)
+    .attr("width", width)
+    .attr("height", height);
+var key = svg.append("g")
+    .attr("class", "key")
+    .attr("transform", "translate(550,20)");
+ 
+queue()
+    .defer(d3.json, "data/state.topojson")
+    .defer(d3.tsv, "data/2009school_map.tsv")
+    .await(ready);
+
+function ready(error, state, schools) {
+  school = schools;
+ breaks = ss.jenks(school.map(function(d) { return +d.Total; }), 6);
+breaks.pop();
+breaks.shift();
+  color.domain(breaks)
+  states = topojson.object(state, state.objects.state).geometries.filter(function(d){
+          return d.id != '60' && d.id != '69' && d.id != '66' && d.id != '78'});
+  totalByFips= d3.nest()
+                .key(function(d){return d.Fips})
+                .map(schools);
+
+  var statePaths = svg.append("g")
+              .attr("id","statePath");  
+  var s = statePaths.selectAll("path")
+            .data(states)
+            	.enter()
+            	.append("path")
+           	 .attr("d",path)
+           	 .style("fill", function(d){console.log(d.id);return color(+totalByFips[d.id][0].Total)});
+     s.append("svg:title")
+        .text(function(d) { 
+                      return totalByFips[d.id][0].State + ":$" + format(totalByFips[d.id][0].Total);
+        	});  
+
+ var stateBoundaryPath = svg.append("path")
+        .datum(topojson.mesh(state, state.objects.state, function(a, b) { return a !== b; }))
+        .attr("d", path)
+        .attr("class", "state-boundary");
+
+// A position encoding for the key only.
+var x = d3.scale.linear()
+    .domain([42500,110000000])
+    .range([0, 360]);
+
+var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("bottom")
+    //.tickSize(13)
+   // .tickValues(color.domain());
+key.selectAll("rect")
+    .data(color.range().map(function(d, i) {
+      return {
+        x0: i ? x(color.domain()[i - 1]) : x.range()[0],
+        x1: i < color.domain().length ? x(color.domain()[i]) : x.range()[1],
+        z: d
+      };
+    }))
+  .enter().append("rect")
+    .attr("height", 8)
+    .attr("x", function(d) { return d.x0; })
+    .attr("width", function(d) { return d.x1 - d.x0; })
+    .style("fill", function(d) { return d.z; });
+
+
+key.selectAll('text').remove();
+key.selectAll('text')
+	.data([{x:10,y:-6, txt:'3'},{x:25,y:-6, txt:'10'}, {x:50,y:-6, txt:'17'},{x:85,y:-6, txt:'26'},{x:125,y:-6, txt:'40'}, {x:300,y:-6, txt:'$100 million'}])
+	.enter()
+	.append("text")
+    .attr("class", "caption")
+    .attr("x",function(d){return d.x})
+    .attr("y", function(d){return d.y})
+    .text(function(d){return d.txt});
+
+};
+
+
+
+
+</script>

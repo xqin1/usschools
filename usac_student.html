@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<header>
+   <link rel="stylesheet" href="css/bootstrap.min.css"/>
+</header>
+<style>
+body,
+svg {
+  height: 100%;
+  margin: 0;
+  width: 100%;
+  float: left;
+}
+
+path {
+  fill: none;
+  stroke-linejoin: round;
+          stroke: #fff;
+        stroke-width:1px;
+}
+
+.state {
+  fill: #ccc;
+  fill-opacity:0;
+  cursor:pointer;
+}
+.state-boundary {
+        fill: none;
+        stroke: #fff;
+        stroke-width:1px;
+        pointer-events: none;
+}
+</style>
+<body>
+<div id="title">
+	<h2>Schools and Libraries Funding Commitments and Disbursements per Student by State </h2>
+</div>
+<div>
+	<h3>Funding Year 2008: July 1, 2008 through June 30, 2009</h3>
+</div>
+<div id="subcat">
+    <div class="btn-group">
+        <a href="#" id="state" class="btn active">Normal</a>
+        <a href="#" id="carto" class="btn">Carto</a>        
+    </div>
+  </div>
+<div id="map"></div>
+							
+<<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="http://d3js.org/topojson.v0.min.js"></script>
+<script src="http://d3js.org/queue.v1.min.js"></script>
+<script src="js/simple_statistics.js"></script>
+<script src="js/cartogram.js"></script>
+
+<script>
+
+var width = 800,
+    height = 600;
+var format = d3.format(",");
+//var projection = albersUsa();
+var projection = d3.geo.albersUsa();
+var path = d3.geo.path()
+    .projection(projection);
+var currentSelection = "state";
+var color = d3.scale.threshold()
+   // .domain(ss.jenks(school.map(function(d) { return +d.Total; }), 6))
+    .range(["#F2F0F7", "#DADAEB", "#BCBDDC", "#9E9AC8", "#807DBA", "#6A51A3", "#4A1486"]);
+
+var svg = d3.select("#map").append("svg")
+   // .attr("viewBox", "0 0 " + width + " " + height)
+    .attr("width", width)
+    .attr("height", height);
+var statePaths = svg.append("g")
+              .attr("id","statePath"); 
+var key = svg.append("g")
+    .attr("class", "key")
+    .attr("transform", "translate(550,20)");
+d3.selectAll('.btn-group a').on("click", 
+                                  function(e){
+                                    d3.selectAll('.btn-group a').classed('active', false);
+                                    d3.select(this).classed('active',true);
+                                      currentSelection = d3.select(this).attr('id');
+                                      drawStates()});
+ 
+queue()
+    .defer(d3.json, "data/state.topojson")
+    .defer(d3.tsv, "data/2008student.tsv")
+    .await(ready);
+
+function ready(error, state, students) {
+  student = students;
+  breaks = ss.jenks(student.map(function(d) { return +d.Disbursed_Student; }), 6);
+  breaks.pop();
+  breaks.shift();
+  color.domain(breaks)
+
+  totalByFips= d3.nest()
+                .key(function(d){return d.Fips})
+                .map(students);
+
+  scale = d3.scale.linear()
+          .domain(d3.extent(student.map(function(d) { return +d.Disbursed_Student; })))
+          .range([1, 3000]);
+ 
+ carto = d3.cartogram()
+            .projection(projection)
+
+   carto.value(function(d) {
+          return scale(totalByFips[d.id][0].Disbursed_Student);
+
+        });
+   var stateGeo = state.objects.state.geometries.filter(function(d){
+          return d.id != '60' && d.id != '69' && d.id != '66' && d.id != '78'});
+
+  //generate the new features, pre-projected
+  cartoStates = carto(state, stateGeo).features;
+
+  states = topojson.object(state, state.objects.state).geometries.filter(function(d){
+          return d.id != '60' && d.id != '69' && d.id != '66' && d.id != '78'});
+
+
+
+  //drawStates();
+  drawStates();
+
+// A position encoding for the key only.
+var x = d3.scale.linear()
+    .domain([2,170])
+    .range([0, 360]);
+
+var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("bottom")
+    //.tickSize(13)
+   // .tickValues(color.domain());
+key.selectAll("rect")
+    .data(color.range().map(function(d, i) {
+      return {
+        x0: i ? x(color.domain()[i - 1]) : x.range()[0],
+        x1: i < color.domain().length ? x(color.domain()[i]) : x.range()[1],
+        z: d
+      };
+    }))
+  .enter().append("rect")
+    .attr("height", 8)
+    .attr("x", function(d) { return d.x0; })
+    .attr("width", function(d) { return d.x1 - d.x0; })
+    .style("fill", function(d) { return d.z; });
+key.selectAll('text').remove();
+key.selectAll('text')
+	.data([{x:15,y:-6, txt:'16'}, {x:50,y:-6, txt:'28'},{x:75,y:-6, txt:'42'},{x:110,y:-6, txt:'56'},{x:155,y:-6, txt:'77'},{x:340,y:-6, txt:'$170'}])
+	.enter()
+	.append("text")
+    .attr("class", "caption")
+    .attr("x",function(d){return d.x})
+    .attr("y", function(d){return d.y})
+    .text(function(d){return d.txt});
+
+};
+
+function drawStates(){
+  var data = currentSelection=="state"? states:cartoStates;
+  var sPath = currentSelection == "state" ? path:carto.path;
+  var sp = statePaths.selectAll("path").data(data);
+  var spEnter = sp.enter()
+                  .append("path")
+                  //.attr("class", "state-boundary")
+                  .attr("d",sPath)
+                  .style("fill", function(d){return color(+totalByFips[d.id][0].Disbursed_Student)}); 
+  var spUpdate = d3.transition(sp)
+                // .attr("class", "state-boundary")
+                  .style("fill", function(d){return color(+totalByFips[d.id][0].Disbursed_Student)})
+                  .transition()
+                  .duration(750)
+                  .ease("linear")
+                  .attr("d",sPath);
+
+    sp.append("svg:title")
+        .text(function(d) { 
+                      return totalByFips[d.id][0].State + ":$" + format(totalByFips[d.id][0].Disbursed_Student);
+          });  
+}
+</script>
