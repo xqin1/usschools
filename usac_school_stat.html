@@ -11,6 +11,7 @@ canvas{
 }
 svg{
   fill:none;
+  position:absolute;
 }
 
 path {
@@ -30,6 +31,13 @@ path {
         stroke-width:1px;
         pointer-events: none;
 }
+.circle {
+      fill:#aa0011;
+      fill-opacity: 0.4;
+      stroke:#fff;
+      stroke-width:0.5px;
+      pointer-events:all;
+    }
 #map {
     border: 1px solid red;
     float: left;
@@ -183,21 +191,30 @@ path {
 //http://bl.ocks.org/mbostock/5180185
 var width = 800,
     height = 450;
-var data, schools;
+var data, schools,centroids;
 var projection = d3.geo.albersUsa()
-    .scale(950)
+    .scale(850)
     .translate([width / 2, height / 2]);
 var path = d3.geo.path()
     .projection(projection);
+var radius = d3.scale.sqrt()
+      .domain([0,1])
+      .range([0,30])
+var format = d3.format(",");
 
-
-var canvas = d3.select("#map").append("canvas")
+var canvas = d3.select("#map").insert("canvas")
     .attr("width", width)
     .attr("height", height)
     .style("opacity", 1);
 var svg = d3.select("#map").append("svg")
     .attr("width", width)
     .attr("height", height);
+
+var statePaths = svg.append("g")
+              .attr("id","statePath"); 
+var bubble = svg.append("g")
+              .attr("id", "bubbles");
+
 var context = canvas.node().getContext("2d");
 context.fillStyle = "#fff";
 context.fillRect(0, 0, width, height);
@@ -205,9 +222,10 @@ context.fillRect(0, 0, width, height);
 queue()
   .defer(d3.tsv, "data/school_stat.tsv")
   .defer(d3.json, "data/state.topojson")
+  .defer(d3.json, "data/state_centroid.geojson")
   .await(ready);
 //d3.tsv("data/school_stat.tsv", function(error, school) {
-function ready(error, school,state){
+function ready(error, school,state,stateCentroid){
   schools = school;
   schools.forEach(function(d) {
     var p = projection([+d.lon, +d.lat]);
@@ -220,7 +238,7 @@ function ready(error, school,state){
     d.member = +d.member;
     d.frlpct = +d.totfrlPct;
     d.maxdown = +d.maxdown;
-  });
+});
   
   data = crossfilter(schools);
   data.fips = data.dimension(function(d){return d.fips});
@@ -230,14 +248,14 @@ function ready(error, school,state){
   data.locality = data.dimension(function(d){return d.ulocal});
   data.frlPct = data.dimension(function(d){return d.frlpct});
   data.member = data.dimension(function(d){return d.member});
-   data.maxdown = data.dimension(function(d){return d.maxdown});
+  data.maxdown = data.dimension(function(d){return d.maxdown});
 
-
-  states = topojson.object(state, state.objects.state).geometries.filter(function(d){
+var states = topojson.object(state, state.objects.state).geometries.filter(function(d){
           return d.id != '60' && d.id != '69' && d.id != '66' && d.id != '78'});
+centroids = stateCentroid.features.filter(function(d){
+          return d.properties.fips != '60' && d.properties.fips != '69' && d.properties.fips != '66' && d.properties.fips != '78'});
+centroids.forEach(function(d){d.fips = parseInt(d.properties.fips,10)});
 
-var statePaths = svg.append("g")
-              .attr("id","statePath");  
 var s = statePaths.selectAll("path")
             .data(states)
               .enter()
@@ -245,7 +263,40 @@ var s = statePaths.selectAll("path")
               .attr("d",path)
               .attr("class", "state");
 d3.select("#txtSelection").text("0 records selected out of " + data.size());         
-  change();
+change();
+}
+
+function drawBubbles(){
+  radius.domain([0,data.groupByFips.top(1)[0].value]);
+   valueObj = d3.nest().key(function(d){return d.key}).map(data.groupByFips.top(Infinity));
+   bubbleData = centroids.filter(function(d){return valueObj[d.fips] != "undefined"}); 
+
+  var bubbles = bubble.selectAll(".circle")
+                      .data(bubbleData, function(d){return d.fips});
+
+  //enter
+  bubbles.enter().append("circle").attr("class","circle")
+           .attr("transform", function(d){
+                            var c = projection(d.geometry.coordinates);
+                            var x = c[0], y = c[1];
+                            return "translate(" + x + "," + y + ")";
+                          })
+            .attr("r", function(d){return radius(valueObj[d.fips][0].value)})
+            .on("click", function(d){console.log(d.fips)});
+
+//update
+  bubbles.attr("class","circle")
+        .transition()
+          .duration(750)
+           .attr("r", function(d){return radius(valueObj[d.fips][0].value)});
+
+  //exit
+  bubbles.exit().attr("class","circle")
+          .transition()
+          .duration(750)
+          .style("fill-opacity",1e-6)
+          .remove();
+
 }
 
   function change() {
@@ -299,7 +350,9 @@ d3.select("#txtSelection").text("0 records selected out of " + data.size());
               context.fillRect(d.x, d.y, 1, 1);
         })
         d3.select("#txtSelection").text(data.member.top("Infinity").length + " records selected out of " + data.size());
+        drawBubbles();
     }
+
   }
 
 
