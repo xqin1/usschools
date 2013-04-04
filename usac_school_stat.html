@@ -10,8 +10,8 @@ canvas{
   position:absolute;
 }
 svg{
-  fill:none;
   position:absolute;
+   font: 10px sans-serif;
 }
 
 path {
@@ -33,11 +33,30 @@ path {
 }
 .circle {
       fill:#aa0011;
-      fill-opacity: 0.4;
+      fill-opacity: 0.3;
       stroke:#fff;
       stroke-width:0.5px;
       pointer-events:all;
     }
+
+.caption {
+  font-weight: bold;
+}
+ 
+  .circleKey line {
+    stroke: #000;
+    shape-rendering: crispEdges;
+  }
+ 
+  .circleKey circle {
+    stroke: #aa0011;
+    stroke-dasharray: 4, 2;
+    fill: none;
+  }
+  .circleKey text{
+     font: 10px sans-serif;
+  }
+
 #map {
     border: 1px solid red;
     float: left;
@@ -73,6 +92,7 @@ path {
 <script src="js/queue.v1.min.js"></script>
 <script src="js/topojson.v0.min.js"></script>
 <script src="js/jquery-1.6.2.min.js"></script>
+<script src="js/simple_statistics.js"></script>
 <script src="http://cdn.leafletjs.com/leaflet-0.5.1/leaflet.js"></script>
  <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
 <script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
@@ -297,6 +317,28 @@ function drawBubbles(){
           .style("fill-opacity",1e-6)
           .remove();
 
+  drawCircleKey();
+
+}
+
+function drawCircleKey(){
+  var finalBreaks=[];
+  d3.selectAll(".key").remove();
+  var circleKey = svg.append("g")
+    .attr("class", "key")
+    .attr("transform", "translate(580,80)");
+  var breaks = ss.jenks(data.groupByFips.top(Infinity).map(function(d){return d.value}),3);
+  breaks.forEach(function(d){
+    d != null? finalBreaks.push(d):null;
+  })
+  console.log(finalBreaks);
+ var keyLegend = scaleKeyCircle()
+        .scale(radius)
+        .tickValues(finalBreaks)
+        //.tickExtend(15)
+        .orient("right");
+  keyLegend(circleKey);
+
 }
 
   function change() {
@@ -322,6 +364,13 @@ function drawBubbles(){
     data.maxdown.filterRange([filterMaxdownSpeed[0],filterMaxdownSpeed[1]+1]);
     data.member.filterRange([filterNumStudent[0],filterNumStudent[1]+1]);
     data.frlPct.filterRange([filterFrlPct[0],filterFrlPct[1]+1]);
+
+    if (data.member.top("Infinity").length == 0){
+       d3.selectAll(".key").remove();
+       d3.select("#txtSelection").text("0 records selected out of " + data.size()); 
+       d3.selectAll('circle').remove();
+      return;
+    }
 
     context.clearRect(0,0,width,height);
 
@@ -354,7 +403,122 @@ function drawBubbles(){
     }
 
   }
-
+function scaleKeyCircle() {
+  var scale,
+      orient = "left",
+      tickPadding = 3,
+      tickExtend = 5,
+      tickArguments_ = [5],
+      tickValues = null,
+      tickFormat_
+ 
+ 
+function key(g) {
+    g.each(function() {
+      var g = d3.select(this);
+ 
+      // Ticks, or domain values for ordinal scales.
+      var ticks = tickValues == null ? (scale.ticks ? scale.ticks.apply(scale, tickArguments_) : scale.domain()) : tickValues,
+          tickFormat = tickFormat_ == null ? (scale.tickFormat ? scale.tickFormat.apply(scale, tickArguments_) : String) : tickFormat_;
+ 
+      ticks = ticks.slice().reverse()
+ 
+      ticks.forEach(function(tick) {
+        var gg = g.append('g')
+          .attr('class', 'circleKey')
+          .attr('transform', 'translate(0,' + - scale(tick) + ')' )
+ 
+        gg.append('circle')
+          .attr('cx', 0)
+          .attr('cy', 0)
+          .attr('r', scale(tick))
+ 
+        var x1 = scale(tick),
+            x2 = tickExtend + scale(ticks[0]),
+            tx = x2 + tickPadding,
+            textAnchor = "start"
+ 
+        if ("left" == orient) {
+          x1 = -x1
+          x2 = -x2
+          tx = -tx
+          textAnchor = "end"
+        }
+ 
+        gg.append('line')
+          .attr('x1', x1)
+          .attr('x2', x2)
+          .attr('y1', 0)
+          .attr('y2', 0)
+          .attr('stroke', '#000')
+          .text(tick)
+ 
+        gg.append('text')
+          .attr('transform', 'translate('+ tx +', 0)' )
+          .attr('dy', '.35em')
+          .style('text-anchor', textAnchor)
+          .text(tickFormat(tick))
+      })
+ 
+    })
+  }
+ 
+  key.scale = function(value) {
+    if (!arguments.length) return scale;
+    scale = value;
+    return key;
+  };
+ 
+  key.orient = function(value) {
+    if (!arguments.length) return orient;
+    orient = value;
+    return key;
+  };
+ 
+  key.ticks = function() {
+    if (!arguments.length) return tickArguments_;
+    tickArguments_ = arguments;
+    return key;
+  };
+ 
+  key.tickFormat = function(x) {
+    if (!arguments.length) return tickFormat_;
+    tickFormat_ = x;
+    return key;
+  };
+ 
+  key.tickValues = function(x) {
+    if (!arguments.length) return tickValues;
+    tickValues = x;
+    return key;
+  };
+ 
+  key.tickPadding = function(x) {
+    if (!arguments.length) return tickPadding;
+    tickPadding = +x;
+    return key;
+  };
+ 
+  key.tickExtend = function(x) {
+    if (!arguments.length) return tickExtend;
+    tickExtend = +x;
+    return key;
+  };
+ 
+  key.width = function(value) {
+    if (!arguments.length) return width;
+    width = value;
+    return key;
+  };
+ 
+  key.height = function(value) {
+    if (!arguments.length) return height;
+    height = value;
+    return key;
+  };
+ 
+  return key;
+}
 
 </script>
 </body>
