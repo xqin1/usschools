@@ -62,7 +62,7 @@ path {
     float: left;
     height: 700px;
     position: relative;
-    width: 64%;
+    width: 900px;
 }
 
 
@@ -73,7 +73,7 @@ path {
     height: 700px;
     right: 0;
     top: 0;
-    width: 34%;
+    width: 500px;
 }
 .slider{
   width:200px;
@@ -109,7 +109,7 @@ path {
     <div id="map"></div>
     <div id="map-sidebar">
             <div class="filter">
-              <div class="float_left">Number Students:<span id="numStudents">0 - 9700 </span></div>
+              <div class="float_left">Number Students:<span id="numStudents">0 - 6545 </span></div>
               <div id="studentSlider" class = "slider"></div>
             </div>
             <div class="filter">
@@ -164,7 +164,17 @@ path {
             <div class="filter">
               <div><h4><span id="txtSelection" class="float_left"></span></h3></div>
             </div>
-            <div id = "contents">some</div>
+            <div id="details">
+              <div class="float_left" id="tableFilterTxt">Top 10 schools in US based on </div>
+              <div id ="tableFilter">
+                <select>
+                  <option value="member">Number of Students</option>
+                  <option value = "frlPct">Free Lunch Percent</option>
+                  <option value = "maxdown">Maxdown Speed</option>
+                </select>
+              </div>
+              <div id="contents"></div>
+            </div>
     </div>
 </div>
 
@@ -204,8 +214,11 @@ path {
             stop:function(event,ui){change()}
           });
         $("#type select").change(function(e){change()});
-          $("#level select").change(function(e){change()});
-           $("#locality select").change(function(e){change()});
+        $("#level select").change(function(e){change()});
+        $("#locality select").change(function(e){change()});
+        $("#locality select").change(function(e){change()});
+        $("#tableFilter select").change(function(e){drawTable()});
+        $("#details").hide();
     });
 
 //http://bl.ocks.org/mbostock/5180185
@@ -238,6 +251,8 @@ var bubble = svg.append("g")
 var context = canvas.node().getContext("2d");
 context.fillStyle = "#fff";
 context.fillRect(0, 0, width, height);
+
+
 
 queue()
   .defer(d3.tsv, "data/school_stat.tsv")
@@ -288,8 +303,8 @@ change();
 
 function drawBubbles(){
   radius.domain([0,data.groupByFips.top(1)[0].value]);
-   valueObj = d3.nest().key(function(d){return d.key}).map(data.groupByFips.top(Infinity));
-   bubbleData = centroids.filter(function(d){return valueObj[d.fips] != "undefined"}); 
+   var valueObj = d3.nest().key(function(d){return d.key}).map(data.groupByFips.top(Infinity));
+   var bubbleData = centroids.filter(function(d){return valueObj[d.fips] != "undefined"}); 
 
   var bubbles = bubble.selectAll(".circle")
                       .data(bubbleData, function(d){return d.fips});
@@ -318,7 +333,27 @@ function drawBubbles(){
           .remove();
 
   drawCircleKey();
+  drawTable();
 
+}
+
+function drawTable(){
+   d3.select("#contents").html("");
+  var currentTableFilter = $("#tableFilter select").val();
+  var content = "";
+  content += "<table id='tbl-recordDetails' class='tablesorter'><thead><tr><th><div class='sort-wrapper'>StuNum &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>FLPct &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>Type &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>Level &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>Maxdown &nbsp;<span class='sort'></span></div></th><th>locality</th></tr></thead>";
+
+  var d = data[currentTableFilter].top(10);
+   for (var i = 0, length = d.length; i<length; i++) {
+              content += "<tr data-lat=" + d.lat + "data-lon=" + d.lon + "><td>" + d[i].member + "</td>";
+              content += "<td>" + d[i].frlpct + "</td>";
+              content += "<td>" + d[i].type + "</td>";
+              content += "<td>" + d[i].level + "</td>";
+              content += "<td>" + d[i].maxdown + "</td>";
+              content += "<td>" + d[i].ulocal + "</td></tr>";
+        } 
+
+  d3.select("#contents").html(content);
 }
 
 function drawCircleKey(){
@@ -382,6 +417,7 @@ function drawCircleKey(){
           });
 
           d3.select("#txtSelection").text("0 records selected out of " + data.size());
+          $("#details").hide();
     }
     else{
        // Render the inactive schools.
@@ -400,6 +436,7 @@ function drawCircleKey(){
         })
         d3.select("#txtSelection").text(data.member.top("Infinity").length + " records selected out of " + data.size());
         drawBubbles();
+        $("#details").show();
     }
 
   }
