@@ -6,12 +6,16 @@
 <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5.1/leaflet.css" />
 <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
 <style>
+body{
+  background-color:black;
+}
 canvas{
   position:absolute;
 }
 svg{
   position:absolute;
-   font: 10px sans-serif;
+  font: 10px sans-serif;
+  font-color:white;
 }
 
 path {
@@ -48,7 +52,7 @@ path {
 }
  
   .circleKey line {
-    stroke: #000;
+    stroke: white;
     shape-rendering: crispEdges;
   }
  
@@ -59,6 +63,7 @@ path {
   }
   .circleKey text{
      font: 10px sans-serif;
+     fill:white;
   }
 
 #map {
@@ -89,6 +94,7 @@ path {
 }
 .filter{
   overflow:hidden;
+  padding-top: 10px;
 }
 </style>
 <script src="js/d3.v3.min.js"></script>
@@ -260,7 +266,7 @@ var bubble = svg.append("g")
               .attr("id", "bubbles");
 
 var context = canvas.node().getContext("2d");
-context.fillStyle = "#fff";
+context.fillStyle = "black";
 context.fillRect(0, 0, width, height);
 
 
@@ -313,8 +319,8 @@ reset();
 }
 
 function reset(){
-          context.globalAlpha = .4;
-          context.fillStyle = "#000";
+          context.globalAlpha = 0.3;
+          context.fillStyle = "white";
           schools.forEach(function(d) {
               context.fillRect(d.x, d.y, 1, 1);
           });
@@ -482,18 +488,20 @@ function drawCircleKey(){
     }
     else{
        // Render the inactive schools.
-        context.globalAlpha = .4;
+        context.globalAlpha = 0.3;
         var fillColor;
-        context.fillStyle = "#aaa";
+        context.fillStyle = "white";
         schools.forEach(function(d) {
               context.fillRect(d.x, d.y, 1, 1);
           });
 
         // Render the active schools.
         context.globalAlpha = 1;
-        context.fillStyle = "#f00";
+        context.fillStyle = "yellow";
+        var renderSize =1;
+        data.member.top(Infinity).length <1000? renderSize=2:renderSize=1;
         data.member.top(Infinity).forEach(function(d) {
-              context.fillRect(d.x, d.y, 1, 1);
+              context.fillRect(d.x, d.y, renderSize, renderSize);
         })
         d3.select("#txtSelection").text(data.member.top("Infinity").length + " records selected out of " + data.size());
         drawBubbles();
