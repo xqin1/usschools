@@ -201,7 +201,7 @@ table td {
             </div>
 
             <div class="filter">
-              <div><h4><span id="txtSelection" class="float_left"></span></h3></div>
+              <div><h4><span id="txtSelection" class="float_left"></span><span id="reset">&nbsp;&nbsp;<a>reset</a></span></h4></div>
             </div>
             <div id="details">
               <div class="float_left" id="tableFilterTxt">Top 10 schools in US based on </div>
@@ -257,6 +257,8 @@ table td {
             .append("option")
               .attr("value", function(d){return d.value})
               .text(function(d){return d.key});
+
+     d3.select("#reset").on("click", function(e){reset()});
 
        $( "#studentSlider" ).slider({
             range: true,
@@ -376,11 +378,24 @@ reset();
 }
 
 function reset(){
+           context.clearRect(0,0,width,height);
           context.globalAlpha = 0.3;
           context.fillStyle = "white";
           schools.forEach(function(d) {
               context.fillRect(d.x, d.y, 1, 1);
           });
+
+
+       $( "#studentSlider").slider("values", [0,6545]);
+        $( "#lunchStudentSlider" ).slider("values", [0,100]);
+        $( "#maxdownSpeedSlider" ).slider("values", [0,11]);
+        $("#type select").val(0);
+        $("#level select").val(0);
+        $("#locality select").val(0);
+        $("#details").hide();
+        d3.selectAll('.circle').remove();
+        d3.selectAll('.circleKey').remove();
+
 }
 
 function drawBubbles(){
@@ -558,7 +573,6 @@ function drawCircleKey(){
           d3.selectAll(".key").remove();
          d3.select("#txtSelection").text("0 records selected out of " + data.size()); 
           d3.selectAll('circle').remove();
-        $("#details").hide();
         reset();
     }
     else{
