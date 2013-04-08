@@ -5,156 +5,8 @@
 <link rel="stylesheet" href="css/bootstrap.min.css">
 <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5.1/leaflet.css" />
 <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
-<style>
-body{
-  background-color:black;
-}
-canvas{
-  position:absolute;
-}
-svg{
-  position:absolute;
-  font: 10px sans-serif;
-  font-color:white;
-}
+<link rel="stylesheet" href="css/style.css">
 
-path {
-  fill: none;
-  stroke-linejoin: round;
-}
-
-.state {
-  fill: none;
-  stroke: steelblue;
-  stroke-width:0.5px;
-  cursor:pointer;
-}
-.state-boundary {
-        fill: none;
-        stroke: #fff;
-        stroke-width:1px;
-        pointer-events: none;
-}
-.circle {
-      fill:#aa0011;
-      fill-opacity: 0.3;
-      stroke:#fff;
-      stroke-width:0.5px;
-      pointer-events:all;
-    }
-
-.selected{
-      fill-opacity: 1;
-    }
-
-.caption {
-  font-weight: bold;
-}
- 
-  .circleKey line {
-    stroke: #aaa;
-    shape-rendering: crispEdges;
-  }
- 
-  .circleKey circle {
-    stroke: #aaa;
-    stroke-dasharray: 4, 2;
-    fill: none;
-  }
-  .circleKey text{
-     font: 10px sans-serif;
-     fill:#aaa;
-  }
-
-#map {
-    float: left;
-    height: 700px;
-    position: relative;
-    width: 900px;
-}
-
-
-#map-sidebar {
-    float: left;
-    height: 700px;
-    right: 0;
-    top: 0;
-    width: 500px;
-    color:#aaa;
-    padding-left: 6px;
-}
-.slider{
-  width:200px;
-  float:left;
-  margin-left:15px;
-}
-.float_left{
-  float:left;
-}
-.filter{
-  overflow:hidden;
-  padding-top: 10px;
-}
-/*-----------------------------------
-  Tables
--------------------------------------*/
-table {
-  width: 100%;
-  border-collapse: separate;
-  *border-collapse: collapse; /* IE7, collapse table to remove spacing */
-  margin-bottom: 10px;
-  margin-top: 12px;
-}
-
-table th, table td {
-  line-height: 18px;
-  padding: 4px 10px 9px 0;
-  text-align: left;
-}
-
-table th {
-  padding-top: 9px;
-  color: #FEFEFE;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: bold;
-  vertical-align: middle;
-}
-
-table td {
-  color: #D2D2D2;
-  vertical-align: top;
-  border-top: 1px solid #7F7F7F;
-  font-size: 12px;
-}
-
-
-/* Tables - Sort Cols. */
-.sort-wrapper {
-  position: relative;
-}
-
-.sort {
-  height: 16px;
-  position: absolute;
-  /*right: 3px;
-  top: 0;*/
-  width: 13px;
-}
-
-.sorting .sort {
-  background: url("img/dt-arrows.png") no-repeat scroll right center transparent;
-}
-
-.sorting_asc .sort {
-  background: url("img/dt-arrow-up.png") no-repeat right center;
-}
-
-.sorting_desc .sort {
-  background: url("img/dt-arrow-dn.png") no-repeat right center;
-}
-
-</style>
 <script src="js/d3.v3.min.js"></script>
 <script src="js/crossfilter.min.js"></script>
 <script src="js/queue.v1.min.js"></script>
@@ -395,6 +247,7 @@ function reset(){
         $("#details").hide();
         d3.selectAll('.circle').remove();
         d3.selectAll('.circleKey').remove();
+        d3.select("#txtSelection").text("0 records selected out of " + data.size()); 
 
 }
 
@@ -461,6 +314,11 @@ function drawTable(){
 
   $("#contents").html(content);
   initTblSort();
+ d3.selectAll("#tbl-recordDetails tbody tr").on("mouseover", function(){
+           var latlon = d3.select(this);
+           var lat = +latlon.attr("data-lat"), lon = +latlon.attr("data-lon");
+              console.log("lat " +  lat + " lon " + lon);
+          });
 }
 
 function initTblSort() {
@@ -570,9 +428,6 @@ function drawCircleKey(){
     context.clearRect(0,0,width,height);
 
     if (data.member.top(Infinity).length == 0){
-          d3.selectAll(".key").remove();
-         d3.select("#txtSelection").text("0 records selected out of " + data.size()); 
-          d3.selectAll('circle').remove();
         reset();
     }
     else{

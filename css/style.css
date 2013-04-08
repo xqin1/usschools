@@ -1,0 +1,159 @@
+body{
+  background-color:black;
+}
+canvas{
+  position:absolute;
+}
+svg{
+  position:absolute;
+  font: 10px sans-serif;
+  font-color:white;
+}
+
+path {
+  fill: none;
+  stroke-linejoin: round;
+}
+
+.state {
+  fill: none;
+  stroke: steelblue;
+  stroke-width:0.5px;
+  cursor:pointer;
+}
+.state-boundary {
+        fill: none;
+        stroke: #fff;
+        stroke-width:1px;
+        pointer-events: none;
+}
+.circle {
+      fill:#aa0011;
+      fill-opacity: 0.3;
+      stroke:#fff;
+      stroke-width:0.5px;
+      pointer-events:all;
+    }
+
+.selected{
+      fill-opacity: 1;
+    }
+
+.caption {
+  font-weight: bold;
+}
+ 
+  .circleKey line {
+    stroke: #aaa;
+    shape-rendering: crispEdges;
+  }
+ 
+  .circleKey circle {
+    stroke: #aaa;
+    stroke-dasharray: 4, 2;
+    fill: none;
+  }
+  .circleKey text{
+     font: 10px sans-serif;
+     fill:#aaa;
+  }
+
+#map {
+    float: left;
+    height: 700px;
+    position: relative;
+    width: 900px;
+}
+
+
+#map-sidebar {
+    float: left;
+    height: 700px;
+    right: 0;
+    top: 0;
+    width: 500px;
+    color:#aaa;
+    padding-left: 6px;
+}
+.slider{
+  width:200px;
+  float:left;
+  margin-left:15px;
+}
+.float_left{
+  float:left;
+}
+.filter{
+  overflow:hidden;
+  padding-top: 10px;
+}
+/*-----------------------------------
+  Tables
+-------------------------------------*/
+table {
+  width: 100%;
+  border-collapse: separate;
+  *border-collapse: collapse; /* IE7, collapse table to remove spacing */
+  margin-bottom: 10px;
+  margin-top: 12px;
+}
+
+table th, table td {
+  line-height: 18px;
+  padding: 4px 10px 9px 0;
+  text-align: left;
+}
+
+table th {
+  padding-top: 9px;
+  color: #FEFEFE;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+  vertical-align: middle;
+}
+
+table td {
+  color: #D2D2D2;
+  vertical-align: top;
+  border-top: 1px solid #7F7F7F;
+  font-size: 12px;
+}
+
+tr:hover{
+  background-color: #aaa;
+}
+
+
+/* Tables - Sort Cols. */
+.sort-wrapper {
+  position: relative;
+}
+
+.sort {
+  height: 16px;
+  position: absolute;
+  /*right: 3px;
+  top: 0;*/
+  width: 13px;
+}
+
+.sorting .sort {
+  background: url("img/dt-arrows.png") no-repeat scroll right center transparent;
+}
+
+.sorting_asc .sort {
+  background: url("img/dt-arrow-up.png") no-repeat right center;
+}
+
+.sorting_desc .sort {
+  background: url("img/dt-arrow-dn.png") no-repeat right center;
+}
+
+select {
+  width: 150px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  margin-left: 8px;
+  height: 25px;
+}
