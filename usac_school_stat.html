@@ -52,22 +52,21 @@ path {
 }
  
   .circleKey line {
-    stroke: white;
+    stroke: #aaa;
     shape-rendering: crispEdges;
   }
  
   .circleKey circle {
-    stroke: #aa0011;
+    stroke: #aaa;
     stroke-dasharray: 4, 2;
     fill: none;
   }
   .circleKey text{
      font: 10px sans-serif;
-     fill:white;
+     fill:#aaa;
   }
 
 #map {
-    border: 1px solid red;
     float: left;
     height: 700px;
     position: relative;
@@ -76,13 +75,13 @@ path {
 
 
 #map-sidebar {
-   border: 1px solid blue;
-    background-color: #FFFFFF;
     float: left;
     height: 700px;
     right: 0;
     top: 0;
     width: 500px;
+    color:#aaa;
+    padding-left: 6px;
 }
 .slider{
   width:200px;
@@ -96,21 +95,80 @@ path {
   overflow:hidden;
   padding-top: 10px;
 }
+/*-----------------------------------
+  Tables
+-------------------------------------*/
+table {
+  width: 100%;
+  border-collapse: separate;
+  *border-collapse: collapse; /* IE7, collapse table to remove spacing */
+  margin-bottom: 10px;
+  margin-top: 12px;
+}
+
+table th, table td {
+  line-height: 18px;
+  padding: 4px 10px 9px 0;
+  text-align: left;
+}
+
+table th {
+  padding-top: 9px;
+  color: #FEFEFE;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+  vertical-align: middle;
+}
+
+table td {
+  color: #D2D2D2;
+  vertical-align: top;
+  border-top: 1px solid #7F7F7F;
+  font-size: 12px;
+}
+
+
+/* Tables - Sort Cols. */
+.sort-wrapper {
+  position: relative;
+}
+
+.sort {
+  height: 16px;
+  position: absolute;
+  /*right: 3px;
+  top: 0;*/
+  width: 13px;
+}
+
+.sorting .sort {
+  background: url("img/dt-arrows.png") no-repeat scroll right center transparent;
+}
+
+.sorting_asc .sort {
+  background: url("img/dt-arrow-up.png") no-repeat right center;
+}
+
+.sorting_desc .sort {
+  background: url("img/dt-arrow-dn.png") no-repeat right center;
+}
+
 </style>
 <script src="js/d3.v3.min.js"></script>
 <script src="js/crossfilter.min.js"></script>
 <script src="js/queue.v1.min.js"></script>
 <script src="js/topojson.v0.min.js"></script>
-<script src="js/jquery-1.6.2.min.js"></script>
 <script src="js/simple_statistics.js"></script>
 <script src="http://cdn.leafletjs.com/leaflet-0.5.1/leaflet.js"></script>
  <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
 <script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
+  <script src="js/jquery.dataTables.min.js"></script> 
 </header>
 <body>
 <header>
     <div>
-        <h1 class="text-center"> US Public and Private Schools Selector</h1>
+        <h1 class="text-center"> US Public Schools Selector</h1>
     </div>
 </header>
 
@@ -123,7 +181,7 @@ path {
               <div id="studentSlider" class = "slider"></div>
             </div>
             <div class="filter">
-              <div class="float_left">Free/Reduced Lunch Students Pct:<span id="lunchStudents">0 - 100 </span></div>
+              <div class="float_left">F/R Lunch Students Pct:<span id="lunchStudents">0 - 100 </span></div>
               <div id="lunchStudentSlider" class = "slider"></div>
             </div>
             <div class="filter">
@@ -286,7 +344,6 @@ function ready(error, school,state,stateCentroid){
     d.type = +d.type;
     d.ulocal = +d.ulocal;
     d.level = +d.level;
-    d.totfrl = +d.totfrl;
     d.member = +d.member;
     d.frlpct = +d.totfrlPct;
     d.maxdown = +d.maxdown;
@@ -365,8 +422,8 @@ function drawBubbles(){
 function drawTable(){
   d3.select("#contents").html("");
   var filterNumber = 10;
-  var currentTableFilter = $("#tableFilter select").val();
-  var content = "",d=null;
+   currentTableFilter = $("#tableFilter select").val();
+   content = "",d=null;
   content += "<table id='tbl-recordDetails' class='tablesorter'><thead><tr><th><div class='sort-wrapper'>StuNum &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>FLPct &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>Type &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>Level &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>Maxdown &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>State &nbsp;<span class='sort'></span></div></th><th>locality</th></tr></thead>";
   if (!stateSelected){
     d = data[currentTableFilter].top(filterNumber);
@@ -375,9 +432,9 @@ function drawTable(){
     d = data[currentTableFilter].top(Infinity).filter(function(d){return d.fips==currentStateFips}).filter(function(d,i){return i<filterNumber})
     d3.select("#tableFilterTxt").html("Top " + filterNumber + " schools in " + getStateName(currentStateFips).name + " based on "); 
   }
-
+  content += "<tbody>";
    for (var i = 0, length = d.length; i<length; i++) {
-              content += "<tr data-lat=" + d.lat + "data-lon=" + d.lon + "><td>" + d[i].member + "</td>";
+              content += "<tr data-lat=" + d[i].lat + " data-lon=" + d[i].lon + "><td>" + d[i].member + "</td>";
               content += "<td>" + d[i].frlpct + "</td>";
               content += "<td>" + getVariableName('type', +d[i].type) + "</td>";
               content += "<td>" + getVariableName('level', +d[i].level) + "</td>";
@@ -385,8 +442,26 @@ function drawTable(){
               content += "<td>" + getStateName(d[i].fips).abbrName + "</td>";
               content += "<td>" + getVariableName('locality', +d[i].ulocal) + "</td></tr>";
         } 
+    content +="</tbody></table>";
 
-  d3.select("#contents").html(content);
+  $("#contents").html(content);
+  initTblSort();
+}
+
+function initTblSort() {
+  if ($('#tbl-recordDetails') && $('#tbl-recordDetails tbody tr').length > 1) {
+    $('#tbl-recordDetails').dataTable({
+      "aoColumns": [ null, null, null,null,null,null,null],
+      "aaSorting": [
+        [1, "desc"]
+      ],
+      "bDestroy": true,
+      "bFilter": false,
+      "bInfo": false,
+      "bPaginate": false,
+      "bLengthChange": false
+    });
+  }
 }
 
 function showState(d, element){
