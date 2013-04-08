@@ -120,7 +120,7 @@ table td {
   font-size: 12px;
 }
 
-tr:hover{
+tbody tr:hover{
   background-color: #aaa;
 }
 
@@ -139,15 +139,15 @@ tr:hover{
 }
 
 .sorting .sort {
-  background: url("img/dt-arrows.png") no-repeat scroll right center transparent;
+  background: url("../img/dt-arrows.png") no-repeat scroll right center transparent;
 }
 
 .sorting_asc .sort {
-  background: url("img/dt-arrow-up.png") no-repeat right center;
+  background: url("../img/dt-arrow-up.png") no-repeat right center;
 }
 
 .sorting_desc .sort {
-  background: url("img/dt-arrow-dn.png") no-repeat right center;
+  background: url("../img/dt-arrow-dn.png") no-repeat right center;
 }
 
 select {
