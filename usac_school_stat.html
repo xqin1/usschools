@@ -25,8 +25,10 @@
 </header>
 
 <div class="container-fluid">
-
-    <div id="map"></div>
+    <div id="map-container">
+      <div id="map"></div>
+      <div id="detailmap"></div>
+    </div>
     <div id="map-sidebar">
             <div class="filter">
               <div class="float_left">Number Students:<span id="numStudents">0 - 6545 </span></div>
@@ -164,6 +166,20 @@ var radius = d3.scale.sqrt()
       .range([0,30])
 var format = d3.format(",");
 
+//leaflet map
+var lmap = new L.Map('detailmap', {
+    center: new L.LatLng(38.9, -77.01),
+    zoom: 12,
+    //layers: new L.TileLayer('http://a.tiles.mapbox.com/v3/herwig.map-onzoztaf/{z}/{x}/{y}.png')
+     layers: new L.TileLayer('http://' + ["a", "b", "c", "d"][Math.random() * 4 | 0] +'.tiles.mapbox.com/v3/fcc.map-qly54czi/{z}/{x}/{y}.png')
+});
+var projectionL = d3.geo.mercator();
+var pathL = d3.geo.path()
+        .projection(projectionL);
+projectionL.scale(1).translate([0, 0]);
+var svgMap = d3.select(lmap.getPanes().overlayPane).append("svg"),
+    gMap = svgMap.append("g").attr("class", "leaflet-zoom-hide");
+
 var canvas = d3.select("#map").insert("canvas")
     .attr("width", width)
     .attr("height", height)
@@ -174,6 +190,8 @@ var svg = d3.select("#map").append("svg")
 
 var statePaths = svg.append("g")
               .attr("id","statePath"); 
+var lakePaths = svg.append("g")
+              .attr("id","lakePath"); 
 var bubble = svg.append("g")
               .attr("id", "bubbles");
 
@@ -187,9 +205,10 @@ queue()
   .defer(d3.tsv, "data/school_stat.tsv")
   .defer(d3.json, "data/state.topojson")
   .defer(d3.json, "data/state_centroid.geojson")
+   .defer(d3.json, "data/greatlakes.geojson")
   .await(ready);
 //d3.tsv("data/school_stat.tsv", function(error, school) {
-function ready(error, school,state,stateCentroid){
+function ready(error, school,state,stateCentroid,greatlakes){
   schools = school;
   schools.forEach(function(d) {
     var p = projection([+d.lon, +d.lat]);
@@ -225,6 +244,12 @@ var s = statePaths.selectAll("path")
               .append("path")
               .attr("d",path)
               .attr("class", "state");
+var l = lakePaths.selectAll("path")
+            .data(greatlakes.features)
+              .enter()
+              .append("path")
+              .attr("d",path)
+              .attr("class", "lakes");
 d3.select("#txtSelection").text("0 records selected out of " + data.size());         
 reset();
 }
@@ -289,7 +314,7 @@ function drawBubbles(){
 
 function drawTable(){
   d3.select("#contents").html("");
-  var filterNumber = 10;
+  var filterNumber = 50;
    currentTableFilter = $("#tableFilter select").val();
    content = "",d=null;
   content += "<table id='tbl-recordDetails' class='tablesorter'><thead><tr><th><div class='sort-wrapper'>StuNum &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>FLPct &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>Type &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>Level &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>Maxdown &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>State &nbsp;<span class='sort'></span></div></th><th>locality</th></tr></thead>";
@@ -451,8 +476,14 @@ function drawCircleKey(){
         drawBubbles();
         $("#details").show();
     }
-
   }
+
+// Use Leaflet to implement a D3 geographic projection.
+function project(x) {
+    var point = lmap.latLngToLayerPoint(new L.LatLng(x[1], x[0]));
+    return [point.x, point.y];
+  }
+
 function scaleKeyCircle() {
   var scale,
       orient = "left",
