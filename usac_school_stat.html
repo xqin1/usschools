@@ -165,18 +165,16 @@ var radius = d3.scale.sqrt()
       .domain([0,1])
       .range([0,30])
 var format = d3.format(",");
+var filterNumber = 50;
 
 //leaflet map
 var lmap = new L.Map('detailmap', {
     center: new L.LatLng(38.9, -77.01),
-    zoom: 12,
+    zoom: 4,
     //layers: new L.TileLayer('http://a.tiles.mapbox.com/v3/herwig.map-onzoztaf/{z}/{x}/{y}.png')
      layers: new L.TileLayer('http://' + ["a", "b", "c", "d"][Math.random() * 4 | 0] +'.tiles.mapbox.com/v3/fcc.map-qly54czi/{z}/{x}/{y}.png')
 });
-var projectionL = d3.geo.mercator();
-var pathL = d3.geo.path()
-        .projection(projectionL);
-projectionL.scale(1).translate([0, 0]);
+
 var svgMap = d3.select(lmap.getPanes().overlayPane).append("svg"),
     gMap = svgMap.append("g").attr("class", "leaflet-zoom-hide");
 
@@ -314,9 +312,9 @@ function drawBubbles(){
 
 function drawTable(){
   d3.select("#contents").html("");
-  var filterNumber = 50;
-   currentTableFilter = $("#tableFilter select").val();
-   content = "",d=null;
+
+  var currentTableFilter = $("#tableFilter select").val();
+  var content = "", d=null;
   content += "<table id='tbl-recordDetails' class='tablesorter'><thead><tr><th><div class='sort-wrapper'>StuNum &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>FLPct &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>Type &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>Level &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>Maxdown &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>State &nbsp;<span class='sort'></span></div></th><th>locality</th></tr></thead>";
   if (!stateSelected){
     d = data[currentTableFilter].top(filterNumber);
@@ -344,6 +342,85 @@ function drawTable(){
            var lat = +latlon.attr("data-lat"), lon = +latlon.attr("data-lon");
               console.log("lat " +  lat + " lon " + lon);
           });
+ drawLMap(d);
+}
+
+function drawLMap(pts){
+  var coords = [];
+  var latlon=[];
+  pts.forEach(function(d){
+    var a = [+d.lon, +d.lat];
+    coords.push(a);
+    var b = new L.LatLng(+d.lat,+d.lon);
+    latlon.push(b);
+  })
+
+  bounds= new L.LatLngBounds(latlon);
+  //console.log(bounds);
+  lmap.fitBounds(bounds);
+
+  bubblesL = gMap.selectAll(".circle")
+                      .data(coords, function(d){return d});
+
+  //enter
+  bubblesL.enter().append("circle").attr("class","circle")
+           .attr("transform", function(d){
+                            var c = project(d);
+                            var x = c[0], y = c[1];
+                            return "translate(" + x + "," + y + ")";
+                          })
+            .attr("r", 5)
+            //.on("click", function(d){showState(d,this)});
+
+//update
+  bubblesL.attr("class","circle")
+        .transition()
+          .duration(750)
+          .attr("transform", function(d){
+                var c = project(d);
+                var x = c[0], y = c[1];
+                return "translate(" + x + "," + y + ")";
+              })
+          .attr("r", 5)
+
+  //exit
+  bubblesL.exit().attr("class","circle")
+          .transition()
+          .duration(750)
+          .style("fill-opacity",1e-6)
+          .remove();
+
+  lmap.on("viewreset", resetMap);
+  resetMap();
+}
+
+function resetMap(){
+   var bottomLeft = project([bounds.getSouthWest().lng, bounds.getSouthWest().lat]),
+        topRight = project([bounds.getNorthEast().lng, bounds.getNorthEast().lat]);
+
+    svgMap .attr("width", topRight[0] - bottomLeft[0])
+        .attr("height", bottomLeft[1] - topRight[1])
+        .style("margin-left", bottomLeft[0] + "px")
+        .style("margin-top", topRight[1] + "px");
+
+    gMap.attr("transform", "translate(" + -bottomLeft[0] + "," + -topRight[1] + ")");
+    d3.transition(bubblesL)
+                    .attr("class", "circle")
+                    .attr("transform", function(d) {
+                          var c = project(d)
+                          x = c[0];
+                          y = c[1];
+                          return "translate(" + x + "," + y + ")";
+                    })
+   
+    // g.selectAll(".pulse_circle")
+    //                 .attr("class", "pulse_circle")
+    //                 .attr("transform", function(d) {
+    //                       var centroid = project(d.coordinates)
+    //                       x = centroid[0];
+    //                       y = centroid[1];
+    //                       return "translate(" + x + "," + y + ")";
+    //                 })
 }
 
 function initTblSort() {
