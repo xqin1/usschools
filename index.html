@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>US Public Schools Selector &laquo; FCC</title>
+<meta name="description" content="FCC US Public Schools Selector">
+<meta name="viewport" content="width=device-width">
+<link rel="stylesheet" href="css/bootstrap.css">
+<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5.1/leaflet.css" />
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
+<link rel="stylesheet" href="css/style.css">
+<link rel="shortcut icon" href="http://www.fcc.gov/sites/default/files/fcc_favicon_0.ico" type="image/x-icon">
+<script src="js/d3.v3.min.js"></script>
+<script src="js/crossfilter.min.js"></script>
+<script src="js/queue.v1.min.js"></script>
+<script src="js/topojson.v0.min.js"></script>
+<script src="js/simple_statistics.js"></script>
+<script src="http://cdn.leafletjs.com/leaflet-0.5.1/leaflet.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script> 
+<script>window.jQuery || document.write('<script src="js/libs/jquery-1.8.3.min.js"><\/script>')</script> 
+<script src="js/jquery-ui.js"></script>
+<script src="js/jquery.dataTables.min.js"></script>
+
+</head>
+<body>
+<header>
+    <div id="skip"> <a id="skip-main" href="#skiptarget1" class="visuallyhidden focusable skipLink">Skip to main content</a> <a id="skip-side" href="#skiptarget2" class="visuallyhidden focusable skipLink">Skip to supporting information</a> <a id="skip-foot" href="#skiptarget3" class="visuallyhidden focusable skipLink">Skip to footer and contact information</a> </div>
+    <div id="fcc-banner" class="container-fluid"> <a href="http://www.fcc.gov"> <img src="http://appsextdev.fcc.gov/sab/img/navFCC.gif" alt="Go to the Federal Communications Commission homepage at www.fcc.gov" title="Go to the Federal Communications Commission homepage at www.fcc.gov"> </a>
+        <h1>US Public Schools Selector <span style="font-size: 14px;">(DEMO)</span></h1>
+    </div>
+</header>
+<div class="container-fluid">
+    <div class="maps-filters row">
+        <div class="span2">
+                    <label for="type">School Type:</label>
+                    <select id="type">
+                    </select>
+                </div>
+                <div class="span2">
+                    <label for="level">School Level:</label>
+                    <select id="level">
+                    </select>
+                </div>
+                <div class="span2">
+                    <label for="locality">School Locality:</label>
+                    <select id="locality">
+                    </select>
+                </div>
+        <div class="span2">
+        <span class="slider-label">Number of Students:</span>
+                    <span id="numStudents" class="slider-range">0 - 6545</span>
+                    <div id="studentSlider" class="slider"></div>
+                </div>
+                <div class="span2">
+                <span class="slider-label">% Free Lunch Students:</span>
+                    <span id="lunchStudents" class="slider-range">0 - 100</span>
+                    <div id="lunchStudentSlider" class="slider"></div>
+                </div>
+                <div class="span2">
+                <span class="slider-label">Max Download Speed:</span>
+               	<span id="maxdownSpeed" class="slider-range">N/A - >1gbps</span>
+                    <div id="maxdownSpeedSlider" class="slider"></div>
+                </div>
+    </div>
+    <div class="maps row-fluid">
+        <div id="map-container" class="span6">
+            <div id="map"></div>
+        </div>
+        <div id="map-sidebar" class="span6">
+            <div id="detailmap"></div>
+        </div>
+    </div>
+    <div class="maps-footer row-fluid">
+        <div class="span12">
+            <div id="details" class="row-fluid">
+                <div class="span6">
+                    <label class="hd-table" for="tableFilter">Top 50 Schools in US Based on <span></span></label>
+                    <select id="tableFilter">
+                    </select>
+                </div>
+                <div class="span6"> <div class="pull-right"><span id="txtSelection"></span><span id="reset">&nbsp;&nbsp;&nbsp;<a class="btn btn-small">Reset</a></span></div>                    
+                </div>
+            </div>
+            <div id="contents"></div>
+        </div>
+    </div>
+</div>
+<footer role="contentinfo"> <a id="skiptarget3" name="skiptarget3" tabindex="-1" class="visuallyhidden"></a>
+    <nav class="container" role="navigation">
+        <div class="col">
+            <ul>
+                <li>Federal Communications Commission</li>
+                <li>445 12th Street SW</li>
+                <li>Washington, DC 20554<br>
+                    <br>
+                </li>
+                <li>Phone: 1-888-225-5322</li>
+                <li>TTY:  1-888-835-5322</li>
+                <li>Fax: 1-866-418-0232</li>
+                <li>E-mail: <a href="mailto:fccinfo@fcc.gov">fccinfo@fcc.gov</a></li>
+            </ul>
+        </div>
+        <div class="col">
+            <ul>
+                <li><a href="http://www.fcc.gov/rss">RSS</a></li>
+                <li><a href="http://www.fcc.gov/encyclopedia/privacy-policy">Privacy Policy</a></li>
+                <li><a href="http://www.fcc.gov/comment-policy">Moderation Policy</a></li>
+                <li><a href="http://www.fcc.gov/encyclopedia/website-notices">Website Policies &amp; Notices</a></li>
+                <li><a href="http://www.fcc.gov/encyclopedia/required-plug-ins-players-and-readers">Required Browser &amp; Plug-ins</a></li>
+            </ul>
+        </div>
+        <div class="col">
+            <ul>
+                <li><a href="http://www.fcc.gov/foia">FOIA</a></li>
+                <li><a href="http://www.fcc.gov/encyclopedia/no-fear-act-data">No Fear Act Data</a></li>
+                <li><a href="http://www.fcc.gov/open">Open Government Directive</a></li>
+                <li><a href="http://www.fcc.gov/encyclopedia/plain-writing-fcc">Plain Writing Act</a></li>
+                <li><a href="http://www.fcc.gov/encyclopedia/american-recovery-and-reinvestment-act-2009">2009 Recovery and Reinvestment Act</a></li>
+            </ul>
+        </div>
+    </nav>
+</footer>
+<script>
+  $(document).ready(function() {
+
+     dataConfig ={"level":[{"key":"All", "value":0},{"key":"Primary", "value":1},{"key":"Middle", "value":2},{"key":"High", "value":3},{"key":"Other", "value":4}],
+                  type:[{key:"All", value:0},{key:"Regular", value:1},{key:"Special", value:2},{key:"Vocational", value:3},{key:"Other", value:4}],
+                  locality:[{key:"All", value:0},{key:"City Large", value:11},{key:"City Middle", value:12},{key:"City Small", value:13},
+                                                  {key:"Suburb Large", value:21},{key:"Suburb Middle", value:22},{key:"Suburb Small", value:23},
+                                                  {key:"Town Fringe", value:31},{key:"Town Distant", value:32},{key:"Town Remote", value:33},
+                                                  {key:"Rural Fringe", value:41},{key:"Rural Distant", value:42},{key:"Rural Remote", value:43}],
+                  tableFilter:[{key:"Number of Student", value:"member"}, {key:"Free Lunch Percent",value:"frlPct"},{key:"Maxdown Speed",value:"maxdown"}],
+                  maxdown:[{key:"N/A",value:0},{key:"N/A",value:1},{key:"N/A",value:2},{key:"768kbps-1.5mbps",value:3},{key:"1.5-3mbps",value:4},{key:"3-6mbps",value:5},
+                          {key:"6-10mbps",value:6},{key:"10-25mbps",value:7},{key:"25-50mbps",value:8},{key:"50-100mbps",value:9},{key:"100-1gbps",value:10},{key:">1gbps",value:11}]
+                };
+
+
+     /*d3.select("#type").append("select").on("change", function(e){change();})*/
+	 d3.select("#type").on("change", function(e){change();})
+                      .selectAll("option")
+                        .data(dataConfig.type)
+                        .enter()
+                        .append("option")
+                          .attr("value", function(d){return d.value})
+                          .text(function(d){return d.key});
+
+     /*d3.select("#level").append("select").on("change", function(e){change();})*/
+	 d3.select("#level").on("change", function(e){change();})
+                      .selectAll("option")
+                        .data(dataConfig.level)
+                        .enter()
+                        .append("option")
+                          .attr("value", function(d){return d.value})
+                          .text(function(d){return d.key});
+
+     /*d3.select("#locality").append("select").on("change", function(e){change();})*/
+	 d3.select("#locality").on("change", function(e){change();})
+                .selectAll("option")
+                  .data(dataConfig.locality)
+                  .enter()
+                  .append("option")
+                    .attr("value", function(d){return d.value})
+                    .text(function(d){return d.key});
+     d3.select("#tableFilter").on("change", function(e){drawTable();})
+          .selectAll("option")
+            .data(dataConfig.tableFilter)
+            .enter()
+            .append("option")
+              .attr("value", function(d){return d.value})
+              .text(function(d){return d.key});
+
+     d3.select("#reset").on("click", function(e){reset()});
+
+       $( "#studentSlider" ).slider({
+            range: true,
+            min: 0,
+            max: 6545,
+            values: [ 0, 6545 ],
+            step: 100,
+            slide: function( event, ui ) {
+              $( "#numStudents" ).text(ui.values[ 0 ] + " - " + ui.values[ 1 ] );
+            },
+            stop:function(event,ui){change()}
+          });
+       $( "#lunchStudentSlider" ).slider({
+            range: true,
+            min: 0,
+            max: 100,
+            values: [ 0, 100],
+            step: 1,
+            slide: function( event, ui ) {
+              $( "#lunchStudents" ).text(ui.values[ 0 ] + " - " + ui.values[ 1 ] );
+            },
+            stop:function(event,ui){change()}
+          });
+        $( "#maxdownSpeedSlider" ).slider({
+            range: true,
+            min: 0,
+            max: 11,
+            values: [ 0, 11],
+            step: 1,
+            slide: function( event, ui ) {
+              $( "#maxdownSpeed" ).text(getMaxdownLabel(ui.values[ 0 ], ui.values[ 1 ]) );
+            },
+            stop:function(event,ui){change()}
+          });
+
+        $("#details").hide();
+    });
+
+//http://bl.ocks.org/mbostock/5180185
+var width = 800,
+    height = 450;
+var data, schools,centroids;
+var stateSelected = false, currentStateFips=null;
+var projection = d3.geo.albersUsa()
+    .scale(850)
+    .translate([width / 2, height / 2]);
+var path = d3.geo.path()
+    .projection(projection);
+var radius = d3.scale.sqrt()
+      .domain([0,1])
+      .range([0,30])
+var format = d3.format(",");
+var filterNumber = 50;
+
+//leaflet map
+var lmap = new L.Map('detailmap', {
+    center: new L.LatLng(38.9, -77.01),
+    zoom: 4,
+    //layers: new L.TileLayer('http://a.tiles.mapbox.com/v3/herwig.map-onzoztaf/{z}/{x}/{y}.png')
+     layers: new L.TileLayer('http://' + ["a", "b", "c", "d"][Math.random() * 4 | 0] +'.tiles.mapbox.com/v3/fcc.map-qly54czi/{z}/{x}/{y}.png')
+});
+
+var svgMap = d3.select(lmap.getPanes().overlayPane).append("svg"),
+    gMap = svgMap.append("g").attr("class", "leaflet-zoom-hide");
+
+var canvas = d3.select("#map").insert("canvas")
+    .attr("width", width)
+    .attr("height", height)
+    .style("opacity", 1);
+var svg = d3.select("#map").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+var statePaths = svg.append("g")
+              .attr("id","statePath"); 
+var lakePaths = svg.append("g")
+              .attr("id","lakePath"); 
+var bubble = svg.append("g")
+              .attr("id", "bubbles");
+
+var context = canvas.node().getContext("2d");
+context.fillStyle = "black";
+context.fillRect(0, 0, width, height);
+
+
+
+queue()
+  .defer(d3.tsv, "data/school_stat.tsv")
+  .defer(d3.json, "data/state.topojson")
+  .defer(d3.json, "data/state_centroid.geojson")
+   .defer(d3.json, "data/greatlakes.geojson")
+  .await(ready);
+//d3.tsv("data/school_stat.tsv", function(error, school) {
+function ready(error, school,state,stateCentroid,greatlakes){
+  schools = school;
+  schools.forEach(function(d) {
+    var p = projection([+d.lon, +d.lat]);
+    d.x = Math.round(p[0]), d.y = Math.round(p[1]);
+    d.fips = +d.fips;
+    d.type = +d.type;
+    d.ulocal = +d.ulocal;
+    d.level = +d.level;
+    d.member = +d.member;
+    d.frlpct = +d.totfrlPct;
+    d.maxdown = +d.maxdown;
+});
+  
+  data = crossfilter(schools);
+  data.fips = data.dimension(function(d){return d.fips});
+  data.groupByFips = data.fips.group();
+  data.type = data.dimension(function(d){return d.type});
+  data.level = data.dimension(function(d){return d.level});
+  data.locality = data.dimension(function(d){return d.ulocal});
+  data.frlPct = data.dimension(function(d){return d.frlpct});
+  data.member = data.dimension(function(d){return d.member});
+  data.maxdown = data.dimension(function(d){return d.maxdown});
+
+var states = topojson.object(state, state.objects.state).geometries.filter(function(d){
+          return d.id != '60' && d.id != '69' && d.id != '66' && d.id != '78'});
+centroids = stateCentroid.features.filter(function(d){
+          return d.properties.fips != '60' && d.properties.fips != '69' && d.properties.fips != '66' && d.properties.fips != '78'});
+centroids.forEach(function(d){d.fips = parseInt(d.properties.fips,10)});
+
+var s = statePaths.selectAll("path")
+            .data(states)
+              .enter()
+              .append("path")
+              .attr("d",path)
+              .attr("class", "state");
+var l = lakePaths.selectAll("path")
+            .data(greatlakes.features)
+              .enter()
+              .append("path")
+              .attr("d",path)
+              .attr("class", "lakes");
+d3.select("#txtSelection").text("0 records selected out of " + data.size());         
+reset();
+}
+
+function reset(){
+           context.clearRect(0,0,width,height);
+          context.globalAlpha = 0.3;
+          context.fillStyle = "white";
+          schools.forEach(function(d) {
+              context.fillRect(d.x, d.y, 1, 1);
+          });
+
+
+       $( "#studentSlider").slider("values", [0,6545]);
+        $( "#lunchStudentSlider" ).slider("values", [0,100]);
+        $( "#maxdownSpeedSlider" ).slider("values", [0,11]);
+        $("#type").val(0);
+        $("#level").val(0);
+        $("#locality").val(0);
+        $("#details").hide();
+        d3.selectAll('.circle').remove();
+        d3.selectAll('.circleKey').remove();
+        d3.select("#txtSelection").text("0 records selected out of " + data.size()); 
+
+}
+
+function drawBubbles(){
+  radius.domain([0,data.groupByFips.top(1)[0].value]);
+   var valueObj = d3.nest().key(function(d){return d.key}).map(data.groupByFips.top(Infinity));
+   var bubbleData = centroids.filter(function(d){return valueObj[d.fips] != "undefined"}); 
+
+  var bubbles = bubble.selectAll(".circle")
+                      .data(bubbleData, function(d){return d.fips});
+
+  //enter
+  bubbles.enter().append("circle").attr("class","circle")
+           .attr("transform", function(d){
+                            var c = projection(d.geometry.coordinates);
+                            var x = c[0], y = c[1];
+                            return "translate(" + x + "," + y + ")";
+                          })
+            .attr("r", function(d){return radius(valueObj[d.fips][0].value)})
+            .on("click", function(d){showState(d,this)});
+
+//update
+  bubbles.attr("class","circle")
+        .transition()
+          .duration(750)
+           .attr("r", function(d){return radius(valueObj[d.fips][0].value)});
+
+  //exit
+  bubbles.exit().attr("class","circle")
+          .transition()
+          .duration(750)
+          .style("fill-opacity",1e-6)
+          .remove();
+
+  drawCircleKey();
+  drawTable();
+
+}
+
+function drawTable(){
+  d3.select("#contents").html("");
+
+  var currentTableFilter = $("#tableFilter").val();
+  var content = "", d=null;
+  content += "<table id='tbl-recordDetails' class='table table-hover table-striped  tablesorter'><thead><tr><th><div class='sort-wrapper'>StuNum &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>FLPct &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>Type &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>Level &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>Maxdown &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>State &nbsp;<span class='sort'></span></div></th><th>Locality</th></tr></thead>";
+  if (!stateSelected){
+    d = data[currentTableFilter].top(filterNumber);
+    d3.select("#tableFilterTxt").html("Top " + filterNumber + " schools in US based on "); 
+  } else{
+    d = data[currentTableFilter].top(Infinity).filter(function(d){return d.fips==currentStateFips}).filter(function(d,i){return i<filterNumber})
+    d3.select("#tableFilterTxt").html("Top " + filterNumber + " schools in " + getStateName(currentStateFips).name + " based on "); 
+  }
+  content += "<tbody>";
+   for (var i = 0, length = d.length; i<length; i++) {
+              content += "<tr data-lat=" + d[i].lat + " data-lon=" + d[i].lon + "><td>" + d[i].member + "</td>";
+              content += "<td>" + d[i].frlpct + "</td>";
+              content += "<td>" + getVariableName('type', +d[i].type) + "</td>";
+              content += "<td>" + getVariableName('level', +d[i].level) + "</td>";
+              content += "<td>" + getVariableName('maxdown', +d[i].maxdown) + "</td>";
+              content += "<td>" + getStateName(d[i].fips).abbrName + "</td>";
+              content += "<td>" + getVariableName('locality', +d[i].ulocal) + "</td></tr>";
+        } 
+    content +="</tbody></table>";
+
+  $("#contents").html(content);
+  initTblSort();
+ d3.selectAll("#tbl-recordDetails tbody tr").on("mouseover", function(){
+           var latlon = d3.select(this);
+           var lat = +latlon.attr("data-lat"), lon = +latlon.attr("data-lon");
+              console.log("lat " +  lat + " lon " + lon);
+          });
+ drawLMap(d);
+}
+
+function drawLMap(pts){
+  var coords = [];
+  var latlon=[];
+  pts.forEach(function(d){
+    var a = [+d.lon, +d.lat];
+    coords.push(a);
+    var b = new L.LatLng(+d.lat,+d.lon);
+    latlon.push(b);
+  })
+
+  bounds= new L.LatLngBounds(latlon);
+  //console.log(bounds);
+  lmap.fitBounds(bounds);
+
+  bubblesL = gMap.selectAll(".circle")
+                      .data(coords, function(d){return d});
+
+  //enter
+  bubblesL.enter().append("circle").attr("class","circle")
+           .attr("transform", function(d){
+                            var c = project(d);
+                            var x = c[0], y = c[1];
+                            return "translate(" + x + "," + y + ")";
+                          })
+            .attr("r", 5)
+            //.on("click", function(d){showState(d,this)});
+
+//update
+  bubblesL.attr("class","circle")
+        .transition()
+          .duration(750)
+          .attr("transform", function(d){
+                var c = project(d);
+                var x = c[0], y = c[1];
+                return "translate(" + x + "," + y + ")";
+              })
+          .attr("r", 5)
+
+  //exit
+  bubblesL.exit().attr("class","circle")
+          .transition()
+          .duration(750)
+          .style("fill-opacity",1e-6)
+          .remove();
+
+  lmap.on("viewreset", resetMap);
+  resetMap();
+}
+
+function resetMap(){
+   var bottomLeft = project([bounds.getSouthWest().lng, bounds.getSouthWest().lat]),
+        topRight = project([bounds.getNorthEast().lng, bounds.getNorthEast().lat]);
+
+    svgMap .attr("width", topRight[0] - bottomLeft[0])
+        .attr("height", bottomLeft[1] - topRight[1])
+        .style("margin-left", bottomLeft[0] + "px")
+        .style("margin-top", topRight[1] + "px");
+
+    gMap.attr("transform", "translate(" + -bottomLeft[0] + "," + -topRight[1] + ")");
+    d3.transition(bubblesL)
+                    .attr("class", "circle")
+                    .attr("transform", function(d) {
+                          var c = project(d)
+                          x = c[0];
+                          y = c[1];
+                          return "translate(" + x + "," + y + ")";
+                    })
+   
+    // g.selectAll(".pulse_circle")
+    //                 .attr("class", "pulse_circle")
+    //                 .attr("transform", function(d) {
+    //                       var centroid = project(d.coordinates)
+    //                       x = centroid[0];
+    //                       y = centroid[1];
+    //                       return "translate(" + x + "," + y + ")";
+    //                 })
+}
+
+function initTblSort() {
+  if ($('#tbl-recordDetails') && $('#tbl-recordDetails tbody tr').length > 1) {
+    $('#tbl-recordDetails').dataTable({
+      "aoColumns": [ null, null, null,null,null,null,null],
+      "aaSorting": [
+        [1, "desc"]
+      ],
+      "bDestroy": true,
+      "bFilter": false,
+      "bInfo": false,
+      "bPaginate": false,
+      "bLengthChange": false,
+	  "bScrollCollapse": true,
+	  "sScrollY": 400/*,
+	  "sScrollX": "100%",
+      "sScrollXInner": "110%"*/
+    });
+  }
+}
+
+function showState(d, element){
+  var ee = d3.select(element);
+  if (currentStateFips == +d.fips){
+      ee.classed("selected", false);
+      stateSelected = false;
+      currentStateFips = null;
+  }else{
+    d3.selectAll(".circle").classed("selected", false);
+    currentStateFips = +d.fips;
+    stateSelected = true;
+    ee.classed("selected", true);
+  }
+  
+  drawTable();
+}
+
+function getStateName(fips){
+  var stateName = {};
+  var s = centroids.filter(function(d){return d.fips == parseInt(fips,10)});
+  stateName.abbrName = s[0].properties.abbrname;
+  stateName.name = s[0].properties.name;
+  return stateName;
+}
+
+function getVariableName(type, value){
+  return dataConfig[type].filter(function(d){return +d.value==value})[0].key;
+}
+
+function getMaxdownLabel(val1,val2){
+  var a ="";
+  if (val1<3 || val2==11){
+    a+=dataConfig["maxdown"].filter(function(d){return +d.value==val1})[0].key
+  }else{
+    a+=dataConfig["maxdown"].filter(function(d){return +d.value==val1})[0].key.split("-")[0];
+  }
+  a+=" - ";
+  if (val2<3 || val2 == 11){
+    a+=dataConfig["maxdown"].filter(function(d){return +d.value==val2})[0].key
+  }else{
+    a+=dataConfig["maxdown"].filter(function(d){return +d.value==val2})[0].key.split("-")[1];
+  }
+  return a;
+}
+
+function drawCircleKey(){
+  var finalBreaks=[];
+  d3.selectAll(".key").remove();
+  var circleKey = svg.append("g")
+    .attr("class", "key")
+    .attr("transform", "translate(580,80)");
+  var breaks = ss.jenks(data.groupByFips.top(Infinity).map(function(d){return d.value}),3);
+  breaks.forEach(function(d){
+    d != null? finalBreaks.push(d):null;
+  })
+  console.log(finalBreaks);
+ var keyLegend = scaleKeyCircle()
+        .scale(radius)
+        .tickValues(finalBreaks)
+        //.tickExtend(15)
+        .orient("right");
+  keyLegend(circleKey);
+
+}
+
+  function change() {
+     var filterType = +$("#type").val();
+     var filterLevel = +$("#level").val();
+     var filterLocality = +$("#locality").val();
+     var filterNumStudent = $( "#studentSlider" ).slider('values');
+     var filterFrlPct = $( "#lunchStudentSlider" ).slider('values');
+     var filterMaxdownSpeed = $( "#maxdownSpeedSlider" ).slider('values');;
+
+
+      data.type.filterAll();
+      data.level.filterAll();
+      data.locality.filterAll();
+      data.member.filterAll();
+      data.frlPct.filterAll();
+      data.fips.filterAll();
+      data.maxdown.filterAll();
+
+    filterType==0 ? data.type.filterAll() : data.type.filterExact(filterType);
+    filterLevel==0 ? data.level.filterAll() : data.level.filterExact(filterLevel);
+    filterLocality==0 ? data.locality.filterAll() : data.locality.filterExact(filterLocality);
+    data.maxdown.filterRange([filterMaxdownSpeed[0],filterMaxdownSpeed[1]+1]);
+    data.member.filterRange([filterNumStudent[0],filterNumStudent[1]+1]);
+    data.frlPct.filterRange([filterFrlPct[0],filterFrlPct[1]+1]);
+
+    context.clearRect(0,0,width,height);
+
+    if (data.member.top(Infinity).length == 0){
+        reset();
+    }
+    else{
+       // Render the inactive schools.
+        context.globalAlpha = 0.3;
+        var fillColor;
+        context.fillStyle = "white";
+        schools.forEach(function(d) {
+              context.fillRect(d.x, d.y, 1, 1);
+          });
+
+        // Render the active schools.
+        context.globalAlpha = 1;
+        context.fillStyle = "yellow";
+        var renderSize =1;
+        data.member.top(Infinity).length <1000? renderSize=2:renderSize=1;
+        data.member.top(Infinity).forEach(function(d) {
+              context.fillRect(d.x, d.y, renderSize, renderSize);
+        })
+        d3.select("#txtSelection").text(data.member.top("Infinity").length + " records selected out of " + data.size());
+        drawBubbles();
+        $("#details").show();
+    }
+  }
+
+// Use Leaflet to implement a D3 geographic projection.
+function project(x) {
+    var point = lmap.latLngToLayerPoint(new L.LatLng(x[1], x[0]));
+    return [point.x, point.y];
+  }
+
+function scaleKeyCircle() {
+  var scale,
+      orient = "left",
+      tickPadding = 3,
+      tickExtend = 5,
+      tickArguments_ = [5],
+      tickValues = null,
+      tickFormat_
+ 
+ 
+function key(g) {
+    g.each(function() {
+      var g = d3.select(this);
+ 
+      // Ticks, or domain values for ordinal scales.
+      var ticks = tickValues == null ? (scale.ticks ? scale.ticks.apply(scale, tickArguments_) : scale.domain()) : tickValues,
+          tickFormat = tickFormat_ == null ? (scale.tickFormat ? scale.tickFormat.apply(scale, tickArguments_) : String) : tickFormat_;
+ 
+      ticks = ticks.slice().reverse()
+ 
+      ticks.forEach(function(tick) {
+        var gg = g.append('g')
+          .attr('class', 'circleKey')
+          .attr('transform', 'translate(0,' + - scale(tick) + ')' )
+ 
+        gg.append('circle')
+          .attr('cx', 0)
+          .attr('cy', 0)
+          .attr('r', scale(tick))
+ 
+        var x1 = scale(tick),
+            x2 = tickExtend + scale(ticks[0]),
+            tx = x2 + tickPadding,
+            textAnchor = "start"
+ 
+        if ("left" == orient) {
+          x1 = -x1
+          x2 = -x2
+          tx = -tx
+          textAnchor = "end"
+        }
+ 
+        gg.append('line')
+          .attr('x1', x1)
+          .attr('x2', x2)
+          .attr('y1', 0)
+          .attr('y2', 0)
+          .attr('stroke', '#000')
+          .text(tick)
+ 
+        gg.append('text')
+          .attr('transform', 'translate('+ tx +', 0)' )
+          .attr('dy', '.35em')
+          .style('text-anchor', textAnchor)
+          .text(tickFormat(tick))
+      })
+ 
+    })
+  }
+ 
+  key.scale = function(value) {
+    if (!arguments.length) return scale;
+    scale = value;
+    return key;
+  };
+ 
+  key.orient = function(value) {
+    if (!arguments.length) return orient;
+    orient = value;
+    return key;
+  };
+ 
+  key.ticks = function() {
+    if (!arguments.length) return tickArguments_;
+    tickArguments_ = arguments;
+    return key;
+  };
+ 
+  key.tickFormat = function(x) {
+    if (!arguments.length) return tickFormat_;
+    tickFormat_ = x;
+    return key;
+  };
+ 
+  key.tickValues = function(x) {
+    if (!arguments.length) return tickValues;
+    tickValues = x;
+    return key;
+  };
+ 
+  key.tickPadding = function(x) {
+    if (!arguments.length) return tickPadding;
+    tickPadding = +x;
+    return key;
+  };
+ 
+  key.tickExtend = function(x) {
+    if (!arguments.length) return tickExtend;
+    tickExtend = +x;
+    return key;
+  };
+ 
+  key.width = function(value) {
+    if (!arguments.length) return width;
+    width = value;
+    return key;
+  };
+ 
+  key.height = function(value) {
+    if (!arguments.length) return height;
+    height = value;
+    return key;
+  };
+ 
+  return key;
+}
+
+</script>
+</body>
+</html>
