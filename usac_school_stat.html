@@ -334,6 +334,7 @@ function reset(resetType){
         }
 
         d3.selectAll('.circle').remove();
+         d3.selectAll('.lcircle').remove();
         d3.selectAll('.circleKey').remove();
         d3.select("#contents").html("");
         d3.select("#recordSection").style("visibility","hidden");
@@ -427,21 +428,21 @@ function drawLMap(pts){
   //console.log(bounds);
   lmap.fitBounds(bounds);
 
-  bubblesL = gMap.selectAll(".circle")
+  bubblesL = gMap.selectAll(".lcircle")
                       .data(coords, function(d){return d});
 
   //enter
-  bubblesL.enter().append("circle").attr("class","circle")
+  bubblesL.enter().append("circle").attr("class","lcircle")
            .attr("transform", function(d){
                             var c = project(d);
                             var x = c[0], y = c[1];
                             return "translate(" + x + "," + y + ")";
                           })
-            .attr("r", 5)
+            .attr("r", 2)
             //.on("click", function(d){showState(d,this)});
 
 //update
-  bubblesL.attr("class","circle")
+  bubblesL.attr("class","lcircle")
         .transition()
           .duration(750)
           .attr("transform", function(d){
@@ -449,10 +450,10 @@ function drawLMap(pts){
                 var x = c[0], y = c[1];
                 return "translate(" + x + "," + y + ")";
               })
-          .attr("r", 5)
+          .attr("r", 2)
 
   //exit
-  bubblesL.exit().attr("class","circle")
+  bubblesL.exit().attr("class","lcircle")
           .transition()
           .duration(750)
           .style("fill-opacity",1e-6)
@@ -466,14 +467,14 @@ function resetMap(){
    var bottomLeft = project([bounds.getSouthWest().lng, bounds.getSouthWest().lat]),
         topRight = project([bounds.getNorthEast().lng, bounds.getNorthEast().lat]);
 
-    svgMap .attr("width", topRight[0] - bottomLeft[0])
-        .attr("height", bottomLeft[1] - topRight[1])
+    svgMap .attr("width", topRight[0] - bottomLeft[0] + 300)
+        .attr("height", bottomLeft[1] - topRight[1] + 300)
         .style("margin-left", bottomLeft[0] + "px")
         .style("margin-top", topRight[1] + "px");
 
     gMap.attr("transform", "translate(" + -bottomLeft[0] + "," + -topRight[1] + ")");
     d3.transition(bubblesL)
-                    .attr("class", "circle")
+                    .attr("class", "lcircle")
                     .attr("transform", function(d) {
                           var c = project(d)
                           x = c[0];
