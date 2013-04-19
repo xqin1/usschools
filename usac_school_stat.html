@@ -5,7 +5,11 @@
 <meta name="description" content="FCC US Public Schools Selector">
 <meta name="viewport" content="width=device-width">
 <link rel="stylesheet" href="css/bootstrap.css">
-<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5.1/leaflet.css" />
+<link href='http://api.tiles.mapbox.com/mapbox.js/v1.0.0/mapbox.css' rel='stylesheet' />
+ <!--[if lte IE 8]>
+  <link href='http://api.tiles.mapbox.com/mapbox.js/v1.0.0/mapbox.ie.css' rel='stylesheet' />
+<![endif]-->
+<!-- <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5.1/leaflet.css" /> -->
 <link rel="stylesheet" href="css/jquery-ui.css" />
 <link rel="stylesheet" href="css/style.css">
 <link rel="shortcut icon" href="http://www.fcc.gov/sites/default/files/fcc_favicon_0.ico" type="image/x-icon">
@@ -14,7 +18,8 @@
 <script src="js/queue.v1.min.js"></script>
 <script src="js/topojson.v0.min.js"></script>
 <script src="js/simple_statistics.js"></script>
-<script src="http://cdn.leafletjs.com/leaflet-0.5.1/leaflet.js"></script>
+<script src='http://api.tiles.mapbox.com/mapbox.js/v1.0.0/mapbox.js'></script>
+<!-- <script src="http://cdn.leafletjs.com/leaflet-0.5.1/leaflet.js"></script> -->
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script> 
 <script>window.jQuery || document.write('<script src="js/libs/jquery-1.8.3.min.js"><\/script>')</script> 
 <script src="js/jquery-ui.js"></script>
@@ -72,12 +77,12 @@
     <div class="maps-footer row-fluid">
         <div class="span12">
             <div id="details" class="row-fluid">
-                <div class="span6">
-                    <label class="hd-table" for="tableFilter">Top 50 Schools in US Based on <span></span></label>
+                <div class="span6" id="recordSection">
+                    <label class="hd-table" for="tableFilter" id ="tableFilterTxt">Top 50 Schools in US Based on <span></span></label>
                     <select id="tableFilter">
                     </select>
                 </div>
-                <div class="span6"> <div class="pull-right"><span id="txtSelection"></span><span id="reset">&nbsp;&nbsp;&nbsp;<a class="btn btn-small">Reset</a></span></div>                    
+                <div class="span6" id="resetSection"> <div class="pull-right"><span id="txtSelection"></span><span id="reset">&nbsp;&nbsp;&nbsp;<a class="btn btn-small">Reset</a></span></div>                    
                 </div>
             </div>
             <div id="contents"></div>
@@ -168,7 +173,7 @@
               .attr("value", function(d){return d.value})
               .text(function(d){return d.key});
 
-     d3.select("#reset").on("click", function(e){reset()});
+     d3.select("#reset").on("click", function(e){reset("all")});
 
        $( "#studentSlider" ).slider({
             range: true,
@@ -203,8 +208,6 @@
             },
             stop:function(event,ui){change()}
           });
-
-        $("#details").hide();
     });
 
 //http://bl.ocks.org/mbostock/5180185
@@ -224,14 +227,18 @@ var format = d3.format(",");
 var filterNumber = 50;
 
 //leaflet map
-var lmap = new L.Map('detailmap', {
-    center: new L.LatLng(39.5, -98.5),
-    zoom: 4,
-    //layers: new L.TileLayer('http://a.tiles.mapbox.com/v3/herwig.map-onzoztaf/{z}/{x}/{y}.png')
-    // layers: new L.TileLayer('http://' + ["a", "b", "c", "d"][Math.random() * 4 | 0] +'.tiles.mapbox.com/v3/fcc.map-qly54czi/{z}/{x}/{y}.png')
-    layers: new L.TileLayer('http://' + ["a", "b", "c", "d"][Math.random() * 4 | 0] +'.tiles.mapbox.com/v3/examples.map-0l53fhk2/{z}/{x}/{y}.png')
+// var lmap = new L.Map('detailmap', {
+//     center: new L.LatLng(39.5, -98.5),
+//     zoom: 4,
+//     //layers: new L.TileLayer('http://a.tiles.mapbox.com/v3/herwig.map-onzoztaf/{z}/{x}/{y}.png')
+//     // layers: new L.TileLayer('http://' + ["a", "b", "c", "d"][Math.random() * 4 | 0] +'.tiles.mapbox.com/v3/fcc.map-qly54czi/{z}/{x}/{y}.png')
+//     layers: new L.TileLayer('http://' + ["a", "b", "c", "d"][Math.random() * 4 | 0] +'.tiles.mapbox.com/v3/fcc.map-toolde8w/{z}/{x}/{y}.png')
 
-});
+// });
+
+//use mapbox.js
+  var lmap = L.mapbox.map('detailmap', 'fcc.map-toolde8w')
+      .setView([39.5, -98.5], 4);
 
 var svgMap = d3.select(lmap.getPanes().overlayPane).append("svg"),
     gMap = svgMap.append("g").attr("class", "leaflet-zoom-hide");
@@ -305,12 +312,11 @@ var l = lakePaths.selectAll("path")
               .enter()
               .append("path")
               .attr("d",path)
-              .attr("class", "lakes");
-d3.select("#txtSelection").text("0 records selected out of " + data.size());         
-reset();
+              .attr("class", "lakes");        
+reset("all");
 }
 
-function reset(){
+function reset(resetType){
            context.clearRect(0,0,width,height);
           context.globalAlpha = 0.3;
           context.fillStyle = "white";
@@ -318,18 +324,22 @@ function reset(){
               context.fillRect(d.x, d.y, 1, 1);
           });
 
+        if(resetType == "all"){
+            $( "#studentSlider").slider("values", [0,6545]);
+            $( "#lunchStudentSlider" ).slider("values", [0,100]);
+            $( "#maxdownSpeedSlider" ).slider("values", [0,11]);
+            $("#type").val(0);
+            $("#level").val(0);
+            $("#locality").val(0);
+        }
 
-       $( "#studentSlider").slider("values", [0,6545]);
-        $( "#lunchStudentSlider" ).slider("values", [0,100]);
-        $( "#maxdownSpeedSlider" ).slider("values", [0,11]);
-        $("#type").val(0);
-        $("#level").val(0);
-        $("#locality").val(0);
-        $("#details").hide();
         d3.selectAll('.circle').remove();
         d3.selectAll('.circleKey').remove();
+        d3.select("#contents").html("");
+        d3.select("#recordSection").style("visibility","hidden");
+        d3.select("#resetSection").style("visibility","visible");
         d3.select("#txtSelection").text("0 records selected out of " + data.size()); 
-
+        lmap.setView([39.5, -98.5], 4);
 }
 
 function drawBubbles(){
@@ -592,7 +602,7 @@ function drawCircleKey(){
     context.clearRect(0,0,width,height);
 
     if (data.member.top(Infinity).length == 0){
-        reset();
+        reset("map");
     }
     else{
        // Render the inactive schools.
@@ -613,7 +623,7 @@ function drawCircleKey(){
         })
         d3.select("#txtSelection").text(data.member.top("Infinity").length + " records selected out of " + data.size());
         drawBubbles();
-        $("#details").show();
+        d3.select("#recordSection").style("visibility","visible");
     }
   }
 
