@@ -16,7 +16,7 @@
 <script src="js/d3.v3.min.js"></script>
 <script src="js/crossfilter.min.js"></script>
 <script src="js/queue.v1.min.js"></script>
-<script src="js/topojson.v0.min.js"></script>
+<script src="http://d3js.org/topojson.v1.min.js"></script>
 <script src="js/simple_statistics.js"></script>
 <script src='http://api.tiles.mapbox.com/mapbox.js/v1.0.0/mapbox.js'></script>
 <!-- <script src="http://cdn.leafletjs.com/leaflet-0.5.1/leaflet.js"></script> -->
@@ -225,7 +225,6 @@ var radius = d3.scale.sqrt()
       .range([0,30])
 var format = d3.format(",");
 var filterNumber = 50;
-
 //leaflet map
 // var lmap = new L.Map('detailmap', {
 //     center: new L.LatLng(39.5, -98.5),
@@ -295,7 +294,7 @@ function ready(error, school,state,stateCentroid,greatlakes){
   data.member = data.dimension(function(d){return d.member});
   data.maxdown = data.dimension(function(d){return d.maxdown});
 
-var states = topojson.object(state, state.objects.state).geometries.filter(function(d){
+var states = topojson.feature(state, state.objects.state).features.filter(function(d){
           return d.id != '60' && d.id != '69' && d.id != '66' && d.id != '78'});
 centroids = stateCentroid.features.filter(function(d){
           return d.properties.fips != '60' && d.properties.fips != '69' && d.properties.fips != '66' && d.properties.fips != '78'});
@@ -750,6 +749,18 @@ function key(g) {
  
   return key;
 }
+</script>
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-40344008-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
 
 </script>
 </body>
