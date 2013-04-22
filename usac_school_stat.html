@@ -214,7 +214,7 @@
 var width = 570,
     height = 450;
 var data, schools,centroids;
-var stateSelected = false, currentStateFips=null;
+var stateSelected = false, currentStateFips=null,tableRowSelected=false;
 var projection = d3.geo.albersUsa()
     .scale(650)
     .translate([width / 2, height / 2]);
@@ -225,6 +225,7 @@ var radius = d3.scale.sqrt()
       .range([0,30])
 var format = d3.format(",");
 var filterNumber = 50;
+var excludeStates={"59":1, "60":1, "69":1, "66":1, "78":1};
 //leaflet map
 // var lmap = new L.Map('detailmap', {
 //     center: new L.LatLng(39.5, -98.5),
@@ -271,7 +272,7 @@ queue()
   .await(ready);
 //d3.tsv("data/school_stat.tsv", function(error, school) {
 function ready(error, school,state,stateCentroid,greatlakes){
-  schools = school;
+  schools = school.filter(function(d){return d.fips != '59' && d.fips != '60' && d.fips != '69' && d.fips != '66' && d.fips != '78'});
   schools.forEach(function(d) {
     var p = projection([+d.lon, +d.lat]);
     d.x = Math.round(p[0]), d.y = Math.round(p[1]);
@@ -335,6 +336,7 @@ function reset(resetType){
         d3.selectAll('.circle').remove();
          d3.selectAll('.lcircle').remove();
         d3.selectAll('.circleKey').remove();
+        d3.selectAll(".pulse_circle").remove();
         d3.select("#contents").html("");
         d3.select("#recordSection").style("visibility","hidden");
         d3.select("#resetSection").style("visibility","visible");
@@ -383,7 +385,7 @@ function drawTable(){
 
   var currentTableFilter = $("#tableFilter").val();
   var content = "", d=null;
-  content += "<table id='tbl-recordDetails' class='table table-hover table-striped  tablesorter'><thead><tr><th><div class='sort-wrapper'>StuNum &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>FLPct &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>Type &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>Level &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>Maxdown &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>State &nbsp;<span class='sort'></span></div></th><th>Locality</th></tr></thead>";
+  content += "<table id='tbl-recordDetails' class='table table-hover  tablesorter'><thead><tr><th><div class='sort-wrapper'>StuNum &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>FLPct &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>Type &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>Level &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>Maxdown &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>State &nbsp;<span class='sort'></span></div></th><th>Locality</th></tr></thead>";
   if (!stateSelected){
     d = data[currentTableFilter].top(filterNumber);
     d3.select("#tableFilterTxt").html("Top " + filterNumber + " schools in US based on "); 
@@ -393,6 +395,7 @@ function drawTable(){
   }
   content += "<tbody>";
    for (var i = 0, length = d.length; i<length; i++) {
+    console.log(d[i].fips + " " + getStateName(d[i].fips).abbrName)
               content += "<tr data-lat=" + d[i].lat + " data-lon=" + d[i].lon + "><td>" + d[i].member + "</td>";
               content += "<td>" + d[i].frlpct + "</td>";
               content += "<td>" + getVariableName('type', +d[i].type) + "</td>";
@@ -405,10 +408,14 @@ function drawTable(){
 
   $("#contents").html(content);
   initTblSort();
- d3.selectAll("#tbl-recordDetails tbody tr").on("mouseover", function(){
-           var latlon = d3.select(this);
-           var lat = +latlon.attr("data-lat"), lon = +latlon.attr("data-lon");
-              console.log("lat " +  lat + " lon " + lon);
+
+  d3.selectAll("#tbl-recordDetails tbody tr").on("click", function(){
+            tableRowSelected = false;
+            if (d3.select(this).classed('tablerowselected')){
+              tableRowSelected = true;
+            }
+             d3.selectAll("#tbl-recordDetails tbody tr").classed('tablerowselected',false);
+            highlight(d3.select(this));
           });
  drawLMap(d);
 }
@@ -481,14 +488,14 @@ function resetMap(){
                           return "translate(" + x + "," + y + ")";
                     })
    
-    // g.selectAll(".pulse_circle")
-    //                 .attr("class", "pulse_circle")
-    //                 .attr("transform", function(d) {
-    //                       var centroid = project(d.coordinates)
-    //                       x = centroid[0];
-    //                       y = centroid[1];
-    //                       return "translate(" + x + "," + y + ")";
-    //                 })
+    gMap.selectAll(".pulse_circle")
+                    .attr("class", "pulse_circle")
+                    .attr("transform", function(d) {
+                          var centroid = project(d)
+                          x = centroid[0];
+                          y = centroid[1];
+                          return "translate(" + x + "," + y + ")";
+                    })
 }
 
 function initTblSort() {
@@ -496,7 +503,7 @@ function initTblSort() {
     $('#tbl-recordDetails').dataTable({
       "aoColumns": [ null, null, null,null,null,null,null],
       "aaSorting": [
-        [1, "desc"]
+       // [1, "desc"]
       ],
       "bDestroy": true,
       "bFilter": false,
@@ -632,6 +639,64 @@ function project(x) {
     var point = lmap.latLngToLayerPoint(new L.LatLng(x[1], x[0]));
     return [point.x, point.y];
   }
+
+function highlight(selectedRow){
+  var lat = +selectedRow.attr("data-lat"), lon = +selectedRow.attr("data-lon");
+  var coord=[lon,lat];
+
+  d3.selectAll(".pulse_circle").remove();
+
+  if (tableRowSelected){
+    lmap.fitBounds(bounds);
+  }
+  else{
+      selectedRow.classed('tablerowselected', true);
+
+     bubble.selectAll(".pulse_circle").data([coord])
+                .enter().append("circle")
+                    .attr("class", "pulse_circle")
+                    .attr("transform", function(d) {
+                          var centroid = projection(d)
+                          x = centroid[0];
+                          y = centroid[1];
+                          return "translate(" + x + "," + y + ")";
+                    })
+                    .each(pulse());
+      gMap.selectAll(".pulse_circle").data([coord])
+                .enter().append("circle")
+                    .attr("class", "pulse_circle")
+                    .attr("transform", function(d) {
+                          var centroid = project(d)
+                          x = centroid[0];
+                          y = centroid[1];
+                          return "translate(" + x + "," + y + ")";
+                    })
+                    .each(pulse()); 
+      lmap.setView([lat, lon], 17);
+  }
+}
+
+// function removeHighlight(){
+//   d3.selectAll(".pulse_circle").remove();
+//   //lmap.setView(new L.LatLng(38.9, -77.01),12);
+//   //reset();
+
+// }
+
+function pulse() {
+              return function(d, i, j) {
+                  //the stuff before transition() resets the
+                  //attributes of the pulser when this function is
+                  //called again
+                  d3.select(this).attr("r", 5).style("stroke-opacity", 1.0)
+                  .transition()
+                  .ease("linear") //appears a lot more smoother
+                  .duration(1000)
+                  .attr("r",25)
+                  .style("stroke-opacity", 0.0)
+                  .each("end", pulse()); //lather rinse repeat
+              };
+          }
 
 function scaleKeyCircle() {
   var scale,

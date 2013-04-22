@@ -193,6 +193,19 @@ footer a:hover {
      font: 10px sans-serif;
      fill:#aaa;
   }
+
+  .pulse_circle {
+      fill:none;
+      fill-opacity: 1;
+     /* stroke:#cc0000;*/
+       stroke:white;
+
+      stroke-width:2px;
+    }
+
+  .tablerowselected{
+    background-color:lightsteelblue;
+  }
   
 /* =============================================================================
    Map
