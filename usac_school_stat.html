@@ -24,6 +24,7 @@
 <script>window.jQuery || document.write('<script src="js/libs/jquery-1.8.3.min.js"><\/script>')</script> 
 <script src="js/jquery-ui.js"></script>
 <script src="js/jquery.dataTables.min.js"></script>
+<script src="http://libs.cartocdn.com/cartodb.js/v2/cartodb.js"></script>
 
 </head>
 <body>
@@ -134,8 +135,8 @@
                                                   {key:"Town Fringe", value:31},{key:"Town Distant", value:32},{key:"Town Remote", value:33},
                                                   {key:"Rural Fringe", value:41},{key:"Rural Distant", value:42},{key:"Rural Remote", value:43}],
                   tableFilter:[{key:"Number of Student", value:"member"}, {key:"Free Lunch Percent",value:"frlPct"},{key:"Maxdown Speed",value:"maxdown"}],
-                  maxdown:[{key:"N/A",value:0},{key:"N/A",value:1},{key:"N/A",value:2},{key:"768kbps-1.5mbps",value:3},{key:"1.5-3mbps",value:4},{key:"3-6mbps",value:5},
-                          {key:"6-10mbps",value:6},{key:"10-25mbps",value:7},{key:"25-50mbps",value:8},{key:"50-100mbps",value:9},{key:"100-1gbps",value:10},{key:">1gbps",value:11}]
+                  maxdown:[{key:"N/A",value:0},{key:"N/A",value:1},{key:"N/A",value:2},{key:"768kbps-1.5mbps",value:3},{key:"1.5mbps-3mbps",value:4},{key:"3mbps-6mbps",value:5},
+                          {key:"6mbps-10mbps",value:6},{key:"10mbps-25mbps",value:7},{key:"2mbps-50mbps",value:8},{key:"50mbps-100mbps",value:9},{key:"100mbps-1gbps",value:10},{key:">1gbps",value:11}]
                 };
 
 
@@ -226,6 +227,7 @@ var radius = d3.scale.sqrt()
 var format = d3.format(",");
 var filterNumber = 50;
 var excludeStates={"59":1, "60":1, "69":1, "66":1, "78":1};
+var sql = new cartodb.SQL({ user: 'fcc', format: 'json'});
 //leaflet map
 // var lmap = new L.Map('detailmap', {
 //     center: new L.LatLng(39.5, -98.5),
@@ -283,6 +285,7 @@ function ready(error, school,state,stateCentroid,greatlakes){
     d.member = +d.member;
     d.frlpct = +d.totfrlPct;
     d.maxdown = +d.maxdown;
+    d.id = +d.id;
 });
   
   data = crossfilter(schools);
@@ -379,13 +382,12 @@ function drawBubbles(){
   drawTable();
 
 }
-
 function drawTable(){
   d3.select("#contents").html("");
 
   var currentTableFilter = $("#tableFilter").val();
-  var content = "", d=null;
-  content += "<table id='tbl-recordDetails' class='table table-hover  tablesorter'><thead><tr><th><div class='sort-wrapper'>StuNum &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>FLPct &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>Type &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>Level &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>Maxdown &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>State &nbsp;<span class='sort'></span></div></th><th>Locality</th></tr></thead>";
+  var content = "", d=null, ids=[];
+  content += "<table id='tbl-recordDetails' class='table table-hover  tablesorter'><thead><tr><th><div class='sort-wrapper'>Name &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>Student Number &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>Free Lunch Pct &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>Type &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>Level &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>Maxdown Speed &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>State &nbsp;<span class='sort'></span></div></th><th>Locality</th></tr></thead>";
   if (!stateSelected){
     d = data[currentTableFilter].top(filterNumber);
     d3.select("#tableFilterTxt").html("Top " + filterNumber + " schools in US based on "); 
@@ -393,10 +395,26 @@ function drawTable(){
     d = data[currentTableFilter].top(Infinity).filter(function(d){return d.fips==currentStateFips}).filter(function(d,i){return i<filterNumber})
     d3.select("#tableFilterTxt").html("Top " + filterNumber + " schools in " + getStateName(currentStateFips).name + " based on "); 
   }
-  content += "<tbody>";
-   for (var i = 0, length = d.length; i<length; i++) {
-    console.log(d[i].fips + " " + getStateName(d[i].fips).abbrName)
-              content += "<tr data-lat=" + d[i].lat + " data-lon=" + d[i].lon + "><td>" + d[i].member + "</td>";
+
+  d.forEach(function(e){ids.push(e.id)});
+  console.log(ids);
+
+  sql.execute("SELECT id, schnam FROM school_stat where id in(" + ids.join(",") + ")").done(function(data){
+            // var subjects = [];
+            // for (var i = 0; i < data.rows.length; i++){
+            //     subjects.push(data.rows[i].name)
+            // };
+            // $('#filter').typeahead({source: subjects}) 
+   var resultsObj = d3.nest()
+              .key(function(d){return d.id})
+                .map(data.rows);
+    d.forEach(function(e){return e.schoolname = resultsObj[e.id][0].schnam});
+
+    content += "<tbody>";
+    for (var i = 0, length = d.length; i<length; i++) {
+    //console.log(d[i].fips + " " + getStateName(d[i].fips).abbrName)
+              content += "<tr data-lat=" + d[i].lat + " data-lon=" + d[i].lon + "><td>" + d[i].schoolname + "</td>";
+              content += "<td>" + d[i].member + "</td>";
               content += "<td>" + d[i].frlpct + "</td>";
               content += "<td>" + getVariableName('type', +d[i].type) + "</td>";
               content += "<td>" + getVariableName('level', +d[i].level) + "</td>";
@@ -406,10 +424,10 @@ function drawTable(){
         } 
     content +="</tbody></table>";
 
-  $("#contents").html(content);
-  initTblSort();
+    $("#contents").html(content);
+    initTblSort();
 
-  d3.selectAll("#tbl-recordDetails tbody tr").on("click", function(){
+    d3.selectAll("#tbl-recordDetails tbody tr").on("click", function(){
             tableRowSelected = false;
             if (d3.select(this).classed('tablerowselected')){
               tableRowSelected = true;
@@ -417,7 +435,11 @@ function drawTable(){
              d3.selectAll("#tbl-recordDetails tbody tr").classed('tablerowselected',false);
             highlight(d3.select(this));
           });
- drawLMap(d);
+    drawLMap(d);
+
+  })
+
+ 
 }
 
 function drawLMap(pts){
@@ -501,7 +523,7 @@ function resetMap(){
 function initTblSort() {
   if ($('#tbl-recordDetails') && $('#tbl-recordDetails tbody tr').length > 1) {
     $('#tbl-recordDetails').dataTable({
-      "aoColumns": [ null, null, null,null,null,null,null],
+      "aoColumns": [null, null, null, null,null,null,null,null],
       "aaSorting": [
        // [1, "desc"]
       ],
@@ -548,9 +570,9 @@ function getVariableName(type, value){
 
 function getMaxdownLabel(val1,val2){
   var a ="";
-  if (val1<3 || val2==11){
+  if (val1<3 || val1==11){
     a+=dataConfig["maxdown"].filter(function(d){return +d.value==val1})[0].key
-  }else{
+  }else if (val1>=3){
     a+=dataConfig["maxdown"].filter(function(d){return +d.value==val1})[0].key.split("-")[0];
   }
   a+=" - ";
@@ -630,7 +652,7 @@ function drawCircleKey(){
         })
         d3.select("#txtSelection").text(data.member.top("Infinity").length + " records selected out of " + data.size());
         drawBubbles();
-        d3.select("#recordSection").style("visibility","visible");
+        d3.select("#recordSection").style("visibility", data.member.top("Infinity").length>filterNumber?"visible":"hidden" );
     }
   }
 
