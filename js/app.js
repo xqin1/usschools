@@ -465,7 +465,7 @@ function drawCircleKey(){
   d3.selectAll(".key").remove();
   var circleKey = svg.append("g")
     .attr("class", "key")
-    .attr("transform", "translate(450,80)");
+    .attr("transform", "translate(500,280)");
   var breaks = ss.jenks(data.groupByFips.top(Infinity).map(function(d){return d.value}),3);
   breaks.forEach(function(d){
     d != null? finalBreaks.push(d):null;
@@ -529,6 +529,7 @@ function drawCircleKey(){
         d3.select("#txtSelection").text(data.member.top("Infinity").length + " schools selected out of " + data.size());
         drawBubbles();
         d3.select("#recordSection").style("display", data.member.top("Infinity").length>filterNumber?"block":"none");
+        d3.selectAll(".pulse_circle").remove();
     }
   }
 
