@@ -17,9 +17,7 @@
 /* =============================================================================
    Site Styles
    ========================================================================== */
-body{
-  
-}
+
 
 
 
@@ -28,8 +26,8 @@ body{
    ========================================================================== */
 h1 { color: #FFF; float: left; font-weight: normal; line-height: normal; padding: 15px 0 0 10px; }
 h2 { color: #6E3F19; line-height: 32px; margin: 0; }
-h3, .hd-table { color: #B24C01; font-weight: normal; line-height: normal; margin: 0 0 10px; padding: 0 0 5px; }
-.hd-table { display: inline; font-size: 18px; }
+h3, .hd-table, .hd-map { color: #B24C01; font-size: 18px; font-weight: normal; line-height: normal; margin: 0 0 10px; padding: 0 0 5px; }
+.hd-table { display: inline; margin-bottom: 0; }
 
 
 /* =============================================================================
@@ -40,14 +38,16 @@ header, #fcc-banner { background: url("../img/bgNav.png") repeat-x scroll 0 0 tr
 	padding: 0 10px;
 }
 
-#fcc-banner a {
+.logo {
     float: left;	
-}
-
-#fcc-banner a {
 	margin-right: 20px;	
 }
 
+.nav-utility { 
+    color: #FFF;
+    font-weight: 700;
+    margin-top: 35px;
+}
 
 /* =============================================================================
    Footer
@@ -212,17 +212,23 @@ footer a:hover {
    ========================================================================== */  
 .maps, .maps-filters, .maps-footer { margin-top: 10px; margin-bottom: 5px; }
 .maps { background-color: #303030; margin-bottom: 20px; }   
+.maps-header { margin-top: 10px; }
 
+
+.hd-map, .hd-map-sidebar { display: block; margin: 4px 0 0; padding: 0; }
+.hd-map-sidebar { color: #FFF; display: block; font-size: 16px; font-weight: 700; left: 45px; position: absolute; text-align: center; top: 5px; width: 300px; word-wrap: break-word; z-index: 1; }
    
 #map-container {
-    /*float: left;
-    height: 900px;*/
-    /*position: relative;
-    width: 900px;*/
+    float: left;
+   /* height: 900px;*/
+    /*position: relative;*/
+    margin-left: 20px;
+    width: 586px;
 }
 #map {
     /*float: left;*/
-    height: 450px;
+    height: 350px;
+    margin-left: 10px;
     position: relative;
    /* width: 900px;*/
 }
@@ -242,24 +248,26 @@ path {
 
 #detailmap {
    /* float: left;*/
-    height: 450px;
+    height: 350px;
     /*position: relative;*/
 
    /* left: 35px;
     position: absolute;
     right: 0;
     top: 175px;*/
-    width: 100%;
+    width: 354px;
 }
 
 #map-sidebar {
-    /*float: left;
-    height: 900px;*/
+    float: left;
+    /*height: 900px;*/
    /* right: 0;
     top: 0;
-    width: 500px;
+    
     color:#aaa;*/
     /*padding-left: 6px;*/
+    position: relative;
+    width: 354px;
 }
 
 hr { border: none; border-bottom: 1px solid #999; }
@@ -280,16 +288,17 @@ hr { border: none; border-bottom: 1px solid #999; }
   padding-top: 10px;
 }*/
 
-#map-sidebar { font-size: 12px; position: relative; }
+
 /*.sliders li { margin-bottom: 15px; }
 
 */
 
-.maps-filters label { color: #666; }
-.maps-filters select { font-size: 16px; }
+.maps-filters label { color: #333; }
+
 .slider { margin: 5px 7px; width: 90%; }
-.slider-label { color: #666; display: block; font-weight: 700; }
-.slider-range { display: block; font-size: 22px; line-height: normal; }
+.slider-label { color: #333; display: block; font-weight: 700; }
+.slider-range { display: block; font-size: 14px; line-height: normal; }
+
 
 /* =============================================================================
    Lists
@@ -301,11 +310,11 @@ hr { border: none; border-bottom: 1px solid #999; }
 /* =============================================================================
    Forms
    ========================================================================== */
-select { height: 24px; line-height: normal; padding: 0 0 2px 2px; width: 100%; }   
+select { height: 24px; line-height: normal; padding: 2px; width: 100%; }   
    
 #tableFilter { width: auto; }
 #tableFilterTxt { display: inline; }
-#txtSelection { font-size: 14px; }
+/*#txtSelection { font-size: 14px; }*/
 
 /*-----------------------------------
   Tables
