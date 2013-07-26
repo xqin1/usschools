@@ -87,7 +87,7 @@
 //http://bl.ocks.org/mbostock/5180185
 var width = 570,
     height = 350;
-var data, schools,centroids;
+var data, schools,centroids,bounds, lbounds;
 var stateSelected = false, currentStateFips=null,tableRowSelected=false;
 var projection = d3.geo.albersUsa()
     .scale(650)
@@ -131,7 +131,7 @@ var statePaths = svg.append("g")
 var lakePaths = svg.append("g")
               .attr("id","lakePath"); 
 var bubble = svg.append("g")
-              .attr("id", "bubbles");
+               .attr("id", "bubbles");
 
 var context = canvas.node().getContext("2d");
 context.fillStyle = "#303030";
@@ -173,9 +173,11 @@ function ready(error, school,state,stateCentroid,greatlakes){
 
 var states = topojson.feature(state, state.objects.state).features.filter(function(d){
           return d.id != '60' && d.id != '69' && d.id != '66' && d.id != '78'});
-centroids = stateCentroid.features.filter(function(d){
-          return d.properties.fips != '60' && d.properties.fips != '69' && d.properties.fips != '66' && d.properties.fips != '78'});
-centroids.forEach(function(d){d.fips = parseInt(d.properties.fips,10)});
+//var stateJson = topojson.feature(state,state.objects.state)
+bounds = d3.geo.bounds({type:"FeatureCollection", features:states});
+ centroids = stateCentroid.features.filter(function(d){
+           return d.properties.fips != '60' && d.properties.fips != '69' && d.properties.fips != '66' && d.properties.fips != '78'});
+ centroids.forEach(function(d){d.fips = parseInt(d.properties.fips,10)});
 
 var s = statePaths.selectAll("path")
             .data(states)
@@ -209,9 +211,9 @@ function reset(resetType){
             $("#locality").val(0);
         }
 
-        d3.selectAll('.circle').remove();
-         d3.selectAll('.lcircle').remove();
-        d3.selectAll('.circleKey').remove();
+         d3.selectAll('.circle').remove();
+          d3.selectAll('.lcircle').remove();
+       // d3.selectAll('.circleKey').remove();
         d3.selectAll(".pulse_circle").remove();
         d3.select("#contents").html("");
         d3.select("#recordSection").style("display","none");
@@ -221,37 +223,37 @@ function reset(resetType){
 }
 
 function drawBubbles(){
-  radius.domain([0,data.groupByFips.top(1)[0].value]);
-   var valueObj = d3.nest().key(function(d){return d.key}).map(data.groupByFips.top(Infinity));
-   var bubbleData = centroids.filter(function(d){return valueObj[d.fips] != "undefined"}); 
+//   radius.domain([0,data.groupByFips.top(1)[0].value]);
+//    var valueObj = d3.nest().key(function(d){return d.key}).map(data.groupByFips.top(Infinity));
+//    var bubbleData = centroids.filter(function(d){return valueObj[d.fips] != "undefined"}); 
 
-  var bubbles = bubble.selectAll(".circle")
-                      .data(bubbleData, function(d){return d.fips});
+//   var bubbles = bubble.selectAll(".circle")
+//                       .data(bubbleData, function(d){return d.fips});
 
-  //enter
-  bubbles.enter().append("circle").attr("class","circle")
-           .attr("transform", function(d){
-                            var c = projection(d.geometry.coordinates);
-                            var x = c[0], y = c[1];
-                            return "translate(" + x + "," + y + ")";
-                          })
-            .attr("r", function(d){return radius(valueObj[d.fips][0].value)})
-            .on("click", function(d){showState(d,this)});
+//   //enter
+//   bubbles.enter().append("circle").attr("class","circle")
+//            .attr("transform", function(d){
+//                             var c = projection(d.geometry.coordinates);
+//                             var x = c[0], y = c[1];
+//                             return "translate(" + x + "," + y + ")";
+//                           })
+//             .attr("r", function(d){return radius(valueObj[d.fips][0].value)})
+//             .on("click", function(d){showState(d,this)});
 
-//update
-  bubbles.attr("class","circle")
-        .transition()
-          .duration(750)
-           .attr("r", function(d){return radius(valueObj[d.fips][0].value)});
+// //update
+//   bubbles.attr("class","circle")
+//         .transition()
+//           .duration(750)
+//            .attr("r", function(d){return radius(valueObj[d.fips][0].value)});
 
-  //exit
-  bubbles.exit().attr("class","circle")
-          .transition()
-          .duration(750)
-          .style("fill-opacity",1e-6)
-          .remove();
+//   //exit
+//   bubbles.exit().attr("class","circle")
+//           .transition()
+//           .duration(750)
+//           .style("fill-opacity",1e-6)
+//           .remove();
 
-  drawCircleKey();
+//   drawCircleKey();
   drawTable();
 
 }
@@ -325,9 +327,9 @@ function drawLMap(pts){
     latlon.push(b);
   })
 
-  bounds= new L.LatLngBounds(latlon);
+ lbounds= new L.LatLngBounds(latlon);
   //console.log(bounds);
-  lmap.fitBounds(bounds);
+  lmap.fitBounds(lbounds);
 
   bubblesL = gMap.selectAll(".lcircle")
                       .data(coords, function(d){return d});
@@ -365,11 +367,13 @@ function drawLMap(pts){
 }
 
 function resetMap(){
-   var bottomLeft = project([bounds.getSouthWest().lng, bounds.getSouthWest().lat]),
-        topRight = project([bounds.getNorthEast().lng, bounds.getNorthEast().lat]);
+   // var bottomLeft = project([bounds.getSouthWest().lng, bounds.getSouthWest().lat]),
+   //      topRight = project([bounds.getNorthEast().lng, bounds.getNorthEast().lat]);
+   var bottomLeft = project(bounds[0]),
+        topRight = project(bounds[1]);
 
-    svgMap .attr("width", topRight[0] - bottomLeft[0] + 300)
-        .attr("height", bottomLeft[1] - topRight[1] + 300)
+    svgMap .attr("width", topRight[0] - bottomLeft[0])
+        .attr("height", bottomLeft[1] - topRight[1])
         .style("margin-left", bottomLeft[0] + "px")
         .style("margin-top", topRight[1] + "px");
 
@@ -546,7 +550,7 @@ function highlight(selectedRow){
   d3.selectAll(".pulse_circle").remove();
 
   if (tableRowSelected){
-    lmap.fitBounds(bounds);
+    lmap.fitBounds(lbounds);
   }
   else{
       selectedRow.classed('tablerowselected', true);

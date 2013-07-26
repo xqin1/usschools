@@ -106,6 +106,7 @@ function ready(error, state, students) {
             .projection(projection)
 
    carto.value(function(d) {
+    console.log(d);
           return scale(totalByFips[d.id][0].Disbursed_Student);
 
         });
