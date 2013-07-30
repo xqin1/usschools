@@ -7,7 +7,7 @@
                                                   {key:"Suburb Large", value:21},{key:"Suburb Middle", value:22},{key:"Suburb Small", value:23},
                                                   {key:"Town Fringe", value:31},{key:"Town Distant", value:32},{key:"Town Remote", value:33},
                                                   {key:"Rural Fringe", value:41},{key:"Rural Distant", value:42},{key:"Rural Remote", value:43}],
-                  tableFilter:[{key:"Number of Student", value:"member"}, {key:"Free Lunch Percent",value:"frlPct"},{key:"Maxdown Speed",value:"maxdown"}],
+                  tableFilter:[{key:"Number of Student", value:"member"}, {key:"Free Lunch Percent",value:"frlPct"},{key:"Available Speed",value:"maxdown"}],
                   maxdown:[{key:"N/A",value:0},{key:"N/A",value:1},{key:"N/A",value:2},{key:"768kbps-1.5mbps",value:3},{key:"1.5mbps-3mbps",value:4},{key:"3mbps-6mbps",value:5},
                           {key:"6mbps-10mbps",value:6},{key:"10mbps-25mbps",value:7},{key:"2mbps-50mbps",value:8},{key:"50mbps-100mbps",value:9},{key:"100mbps-1gbps",value:10},{key:">1gbps",value:11}]
                 };
@@ -98,7 +98,7 @@ var radius = d3.scale.sqrt()
       .domain([0,1])
       .range([0,30])
 var format = d3.format(",");
-var filterNumber = 50;
+var filterNumber = 100;
 var excludeStates={"59":1, "60":1, "69":1, "66":1, "78":1};
 var sql = new cartodb.SQL({ user: 'fcc', format: 'json'});
 //leaflet map
@@ -262,17 +262,16 @@ function drawTable(){
 
   var currentTableFilter = $("#tableFilter").val();
   var content = "", d=null, ids=[];
-  content += "<table id='tbl-recordDetails' class='table table-hover tablesorter'><thead><tr><th><div class='sort-wrapper'>Name &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>Student Number &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>Free Lunch Pct &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>Type &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>Level &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>Maxdown Speed &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>State &nbsp;<span class='sort'></span></div></th><th>Locality</th></tr></thead>";
+  content += "<table id='tbl-recordDetails' class='table table-hover tablesorter'><thead><tr><th><div class='sort-wrapper'>Name &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>Student Number &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>Free Lunch Pct &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>Type &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>Level &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>Available Speed &nbsp;<span class='sort'></span></div></th><th><div class='sort-wrapper'>State &nbsp;<span class='sort'></span></div></th><th>Locality</th></tr></thead>";
   if (!stateSelected){
     d = data[currentTableFilter].top(filterNumber);
-    d3.select("#tableFilterTxt").html("Top " + filterNumber + " U.S. schools filtered by "); 
+    d3.select("#tableFilterTxt").html("First " + filterNumber + " of " + data.member.top("Infinity").length + " schools."); 
   } else{
     d = data[currentTableFilter].top(Infinity).filter(function(d){return d.fips==currentStateFips}).filter(function(d,i){return i<filterNumber})
-    d3.select("#tableFilterTxt").html("Top " + filterNumber + " U.S. schools in " + getStateName(currentStateFips).name + " filtered by "); 
+    d3.select("#tableFilterTxt").html("Top " + filterNumber + " of selected schools in " + getStateName(currentStateFips).name + " filtered by "); 
   }
 
   d.forEach(function(e){ids.push(e.id)});
-  console.log(ids);
 
   sql.execute("SELECT id, schnam FROM school_stat where id in(" + ids.join(",") + ")").done(function(data){
             // var subjects = [];
@@ -289,7 +288,7 @@ function drawTable(){
     for (var i = 0, length = d.length; i<length; i++) {
     //console.log(d[i].fips + " " + getStateName(d[i].fips).abbrName)
               content += "<tr data-lat=" + d[i].lat + " data-lon=" + d[i].lon + "><td>" + d[i].schoolname + "</td>";
-              content += "<td>" + d[i].member + "</td>";
+              content += "<td>" + format(d[i].member) + "</td>";
               content += "<td>" + d[i].frlpct + "</td>";
               content += "<td>" + getVariableName('type', +d[i].type) + "</td>";
               content += "<td>" + getVariableName('level', +d[i].level) + "</td>";
@@ -474,7 +473,7 @@ function drawCircleKey(){
   breaks.forEach(function(d){
     d != null? finalBreaks.push(d):null;
   })
-  console.log(finalBreaks);
+  
  var keyLegend = scaleKeyCircle()
         .scale(radius)
         .tickValues(finalBreaks)
@@ -530,9 +529,10 @@ function drawCircleKey(){
         data.member.top(Infinity).forEach(function(d) {
               context.fillRect(d.x, d.y, renderSize, renderSize);
         })
-        d3.select("#txtSelection").text(data.member.top("Infinity").length + " schools selected out of " + data.size());
+        d3.select("#txtSelection").text(data.member.top("Infinity").length + " schools found out of " + data.size());
         drawBubbles();
         d3.select("#recordSection").style("display", data.member.top("Infinity").length>filterNumber?"block":"none");
+		d3.select("#tble-filter").style("display", data.member.top("Infinity").length>filterNumber?"block":"none");
         d3.selectAll(".pulse_circle").remove();
     }
   }
