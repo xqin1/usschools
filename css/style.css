@@ -1,26 +1,3 @@
-/* Table of Content
-==================================================
-	
-	#Basic Styles
-	#Site Styles
-	#Header
-	#Typography
-	#Links
-	#Lists
-	#Images
-	#Buttons
-	#Forms
-	#Misc 
-	#Footer */
-
-
-/* =============================================================================
-   Site Styles
-   ========================================================================== */
-
-
-
-
 /* =============================================================================
    Headings
    ========================================================================== */
@@ -28,394 +5,110 @@ h1 { color: #FFF; float: left; font-weight: normal; line-height: normal; padding
 h2 { color: #6E3F19; line-height: 32px; margin: 0; }
 h3, .hd-table, .hd-map { color: #B24C01; font-size: 18px; font-weight: normal; line-height: normal; margin: 0 0 10px; padding: 0 0 5px; }
 .hd-table { display: inline; margin-bottom: 0; }
-
-
 /* =============================================================================
    Header
    ========================================================================== */
 header, #fcc-banner { background: url("../img/bgNav.png") repeat-x scroll 0 0 transparent; margin-bottom: 0; }
-#fcc-banner {
-	padding: 0 10px;
-}
-
-.logo {
-    float: left;	
-	margin-right: 20px;	
-}
-
-.nav-utility { 
-    color: #FFF;
-    font-weight: 700;
-    margin-top: 35px;
-}
-
+#fcc-banner { padding: 0 10px; }
+.logo { float: left; margin-right: 20px; }
+.nav-utility { color: #FFF; font-weight: 700; margin-top: 35px; }
 /* =============================================================================
    Footer
    ========================================================================== */
-footer {
-	background-color: #5D5D5D;
-	clear: both;
-	color: #EBEBEB;
-	font-size: 11px;
-	line-height: 18px;
-	margin: 100px 0 0;
-	padding: 0;
-}
-
-#footer-help {
-   background-color: #444444;
-   text-align: center;
-}
-
-#footer-help p { 
-	background-color: #444444; 
-	margin-bottom: 0; 
-	padding: 5px 10px; 
-}
-
-#footer-help a
-{
-	color: #B0D67E;	
-}
-
-#footer-help a:hover
-{	
-	color: #B0D67E;
-	text-decoration: underline;	
-}
-
-#footer-help .icon {
-    background: url("../img/icons-sprite.png") no-repeat scroll -304px 0 transparent;
-    display: inline-block;
-    float: none;
-    height: 16px;
-    margin-right: 10px;
-	vertical-align: bottom;
-    width: 16px;
-}
-
-
-footer nav {
-	padding: 15px 10px 50px;	
-}
-
-footer .col {
-	float: left;
-	margin: 0;
-	width: 220px;	
-}
-
-footer ul {
-	margin:0;
-	padding-top:10px;
-}
-
-footer li {
-	list-style-type:none;
-	line-height: 18px;
-	margin:0 0 3px;
-	padding-right:19px;
-}
-
-footer a {
-	color:#EBEBEB;
-	height:30px;
-	padding-top:2px;	
-	text-shadow: 0 1px 0 #000000;
-}
-
-footer a:hover {
-		color: #FFF;	
-}
-
-
+footer { background-color: #5D5D5D; clear: both; color: #EBEBEB; font-size: 11px; line-height: 18px; margin: 100px 0 0; padding: 0; }
+#footer-help { background-color: #444444; text-align: center; }
+#footer-help p { background-color: #444444; margin-bottom: 0; padding: 5px 10px; }
+#footer-help a { color: #B0D67E; }
+#footer-help a:hover { color: #B0D67E; text-decoration: underline; }
+#footer-help .icon { background: url("../img/icons-sprite.png") no-repeat scroll -304px 0 transparent; display: inline-block; float: none; height: 16px; margin-right: 10px; vertical-align: bottom; width: 16px; }
+footer nav { padding: 15px 10px 50px; }
+footer .col { float: left; margin: 0; width: 220px; }
+footer ul { margin:0; padding-top:10px; }
+footer li { list-style-type:none; line-height: 18px; margin:0 0 3px; padding-right:19px; }
+footer a { color:#EBEBEB; height:30px; padding-top:2px; text-shadow: 0 1px 0 #000000; }
+footer a:hover { color: #FFF; }
 /* =============================================================================
    Links
    ========================================================================== */
 #skip { position:absolute; left:35%; top:0; z-index:900; width:50%; }
 #skip a { display:block; width:50%; padding:5px; border-width:0 1px 1px; border-style:solid; border-color:#8cdb78; background:#000; color:#bfe9ff; text-align:center; }
 #skip a:hover, #skip a:focus, #skip a:active { color:#9cf285; text-decoration:none; }
-
-
-.state {
-  fill: none;
-  stroke: steelblue;
-  stroke-width:0.5px;
-  cursor:pointer;
-}
-.lakes {
-  fill: lightsteelblue;
-  fill-opacity:0.6;
-  stroke: lightsteelblue;
-  stroke-width:0.5px;
-  cursor:pointer;
-}
-.state-boundary {
-        fill: none;
-        stroke: #fff;
-        stroke-width:1px;
-        pointer-events: none;
-}
-.circle {
-      fill:#aa0011;
-      fill-opacity: 0.3;
-      stroke:#fff;
-      stroke-width:0.5px;
-      pointer-events:all;
-    }
-.lcircle {
-      fill:yellow;
-      fill-opacity: 1;
-      stroke:#fff;
-      stroke-width:0.5px;
-      pointer-events:all;
-    }
-
-.selected{
-      fill-opacity: 1;
-    }
-
-.caption {
-  font-weight: bold;
-}
- 
-  .circleKey line {
-    stroke: #aaa;
-    shape-rendering: crispEdges;
-  }
- 
-  .circleKey circle {
-    stroke: #aaa;
-    stroke-dasharray: 4, 2;
-    fill: none;
-  }
-  .circleKey text{
-     font: 10px sans-serif;
-     fill:#aaa;
-  }
-
-  .pulse_circle {
-      fill:none;
-      fill-opacity: 1;
-     /* stroke:#cc0000;*/
-       stroke:white;
-
-      stroke-width:2px;
-    }
-
-  .tablerowselected{
-    background-color:lightsteelblue;
-  }
-  
+.tablerowselected { background-color:lightsteelblue; }
 /* =============================================================================
    Map
    ========================================================================== */  
-.maps, .maps-filters, .maps-footer { margin-top: 10px; margin-bottom: 5px; }
-.maps { background-color: #303030; margin-bottom: 20px; }   
-.maps-header { margin-top: 10px; }
-
-
+.maps, .maps-footer { margin-top: 10px; margin-bottom: 5px; }
+.maps { background-color: #303030; margin-bottom: 20px; }
 .hd-map, .hd-map-sidebar { display: block; margin: 4px 0 0; padding: 0; }
 .hd-map-sidebar { color: #FFF; display: block; font-size: 16px; font-weight: 700; left: 45px; position: absolute; text-align: center; top: 5px; width: 300px; word-wrap: break-word; z-index: 1; }
-   
-#map-container {
-    float: left;
-   /* height: 900px;*/
-    /*position: relative;*/
-    margin-left: 20px;
-    width: 586px;
-}
-#map {
-    /*float: left;*/
-    height: 350px;
-    margin-left: 10px;
-    position: relative;
-   /* width: 900px;*/
-}
-
-svg{
-  position:absolute;
-  font: 10px sans-serif;
-  font-color:white;
-  top: 0;
-  left: 0;
-}
-
-path {
-  fill: none;
-  stroke-linejoin: round;
-}
-
-#detailmap {
-   /* float: left;*/
-    height: 350px;
-    /*position: relative;*/
-
-   /* left: 35px;
-    position: absolute;
-    right: 0;
-    top: 175px;*/
-    width: 354px;
-}
-
-#map-sidebar {
-    float: left;
-    /*height: 900px;*/
-   /* right: 0;
-    top: 0;
-    
-    color:#aaa;*/
-    /*padding-left: 6px;*/
-    position: relative;
-    width: 354px;
-}
-
-hr { border: none; border-bottom: 1px solid #999; }
-
+#map-container { float: left; margin-left: 20px; width: 586px; }
+#map { height: 350px; margin-left: 10px; position: relative; }
+svg { position:absolute; font: 10px sans-serif; font-color:white; top: 0; left: 0; }
+path { fill: none; stroke-linejoin: round; }
+#detailmap { height: 350px; width: 354px; }
+#map-sidebar { float: left; position: relative; width: 354px; }
+.state { fill: none; stroke: steelblue; stroke-width:0.5px; cursor:pointer; }
+.lakes { fill: lightsteelblue; fill-opacity:0.6; stroke: lightsteelblue; stroke-width:0.5px; cursor:pointer; }
+.state-boundary { fill: none; stroke: #fff; stroke-width:1px; pointer-events: none; }
+.circle { fill:#aa0011; fill-opacity: 0.3; stroke:#fff; stroke-width:0.5px; pointer-events:all; }
+.lcircle { fill:yellow; fill-opacity: 1; stroke:#fff; stroke-width:0.5px; pointer-events:all; }
+.selected { fill-opacity: 1; }
+.caption { font-weight: bold; }
+.circleKey line { stroke: #aaa; shape-rendering: crispEdges; }
+.circleKey circle { stroke: #aaa; stroke-dasharray: 4, 2; fill: none; }
+.circleKey text { font: 10px sans-serif; fill:#aaa; }
+.pulse_circle { fill:none; fill-opacity: 1; stroke:white; stroke-width:2px; }
 /* =============================================================================
    Map Filters
    ========================================================================== */  
-/*.slider{
-  width:200px;
-  float:left;
-  margin-left:15px;
-}
-.float_left{
-  float:left;
-}
-.filter{
-  overflow:hidden;
-  padding-top: 10px;
-}*/
-
-
-/*.sliders li { margin-bottom: 15px; }
-
-*/
-
+.maps-filters { margin-top: 20px; margin-bottom: 10px; }
 .maps-filters label { color: #333; }
-
 .slider { margin: 5px 7px; width: 90%; }
 .slider-label { color: #333; display: block; font-weight: 700; }
 .slider-range { display: block; font-size: 14px; line-height: normal; }
-
-
 /* =============================================================================
    Lists
    ========================================================================== */
 .filters li { float: left; margin-right: 25px; }
-
-
-
 /* =============================================================================
    Forms
    ========================================================================== */
-select { height: 24px; line-height: normal; padding: 2px; width: 100%; }   
-   
+select { height: 24px; line-height: normal; margin-bottom: 0; padding: 2px; width: 100%; }
 #tableFilter { width: auto; }
 #tableFilterTxt { display: inline; }
-/*#txtSelection { font-size: 14px; }*/
+.lbl-filterBy { display: inline; font-size: 13px; font-weight: bold; vertical-align: middle; }
+/* =============================================================================
+   Tables
+   ========================================================================== */
+.table-hd { margin-bottom: 5px; }
+.sort-wrapper { position: relative; }
+.sort { height: 16px; position: absolute; width: 13px; }
+.sorting .sort { background: url("../img/dt-arrows.png") no-repeat scroll right center transparent; }
+.sorting_asc .sort { background: url("../img/dt-arrow-up.png") no-repeat right center; }
+.sorting_desc .sort { background: url("../img/dt-arrow-dn.png") no-repeat right center; }
 
-/*-----------------------------------
-  Tables
--------------------------------------*/
-/*table {
-  width: 100%;
-  border-collapse: separate;
-  *border-collapse: collapse; 
-  margin-bottom: 10px;
-  margin-top: 12px;
-}
-
-table th, table td {
-  line-height: 18px;
-  padding: 4px 10px 9px 0;
-  text-align: left;
-}
-
-table th {
-  padding-top: 9px;
-  color: #FEFEFE;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: bold;
-  vertical-align: middle;
-}
-
-table td {
-  color: #D2D2D2;
-  vertical-align: top;
-  border-top: 1px solid #7F7F7F;
-  font-size: 12px;
-}
-
-tbody tr:hover{
-  background-color: #aaa;
-}*/
-
-
-/* Tables - Sort Cols. */
-.sort-wrapper {
-  position: relative;
-}
-
-.sort {
-  height: 16px;
-  position: absolute;
-  /*right: 3px;
-  top: 0;*/
-  width: 13px;
-}
-
-.sorting .sort {
-  background: url("../img/dt-arrows.png") no-repeat scroll right center transparent;
-}
-
-.sorting_asc .sort {
-  background: url("../img/dt-arrow-up.png") no-repeat right center;
-}
-
-.sorting_desc .sort {
-  background: url("../img/dt-arrow-dn.png") no-repeat right center;
-}
-
-/*select {
-  width: 150px;
-  background-color: #fff;
-  border: 1px solid #ccc;
-  margin-left: 8px;
-  height: 25px;
-}*/
-
- /*#contents{
- color: #fff;
-  height: 400px;
-  margin-bottom: 20px;
-  position: relative;
-  /*right: 0px;
-  top: 0px;
-  -webkit-user-select:auto;
-  width: 100%;
-  overflow-y:scroll;
-}*/
-
- ::-webkit-scrollbar {
+::-webkit-scrollbar {
  height: 8px;
  width: 10px;
  background: #444;
 }
-  ::-webkit-scrollbar:hover {
+
+::-webkit-scrollbar:hover {
  background: rgb(20,20,20);
 }
-  ::-webkit-scrollbar-thumb {
+
+::-webkit-scrollbar-thumb {
  background: #000;
 }
-  ::-webkit-scrollbar-thumb:hover {
+
+::-webkit-scrollbar-thumb:hover {
  background: #3c1108;
 }
-  ::-webkit-scrollbar-thumb:vertical {
+
+::-webkit-scrollbar-thumb:vertical {
 height: 15px;
 }
-  ::-webkit-scrollbar-thumb:horizontal {
+
+::-webkit-scrollbar-thumb:horizontal {
 width: 15px;
 }
