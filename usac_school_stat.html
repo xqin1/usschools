@@ -31,63 +31,65 @@
 <body>
 <header role="banner">
     <div id="skip"> <a id="skip-main" href="#skiptarget1" class="visuallyhidden focusable skipLink">Skip to main content</a> <a id="skip-foot" href="#skiptarget3" class="visuallyhidden focusable skipLink">Skip to footer and contact information</a> </div>
-    <div id="fcc-banner" class="container"> 
-        <a class="logo" href="http://www.fcc.gov"> <img src="http://appsextdev.fcc.gov/sab/img/navFCC.gif" alt="Go to the Federal Communications Commission homepage at www.fcc.gov" title="Go to the Federal Communications Commission homepage at www.fcc.gov"> </a>
+    <div id="fcc-banner" class="container"> <a class="logo" href="http://www.fcc.gov"> <img src="http://appsextdev.fcc.gov/sab/img/navFCC.gif" alt="Go to the Federal Communications Commission homepage at www.fcc.gov" title="Go to the Federal Communications Commission homepage at www.fcc.gov"> </a>
         <h1>US Public Schools Selector <span style="font-size: 14px;">(DEMO)</span></h1>
-        <a class="nav-utility pull-right" href="#void">About</a>
-    </div>
+        <a class="nav-utility pull-right" href="#void">About</a> </div>
 </header>
 <a class="visuallyhidden" id="skiptarget1" name="skiptarget1" tabindex="-1"></a>
-
 <div class="container">
-<div class="maps-filters row">
-            <div class="span2">
-                <label for="type">School Type:</label>
-                <select id="type">
-                </select>
-            </div>
-            <div class="span2">
-                <label for="level">School Level:</label>
-                <select id="level">
-                </select>
-            </div>
-            <div class="span2">
-                <label for="locality">School Locality:</label>
-                <select id="locality">
-                </select>
-            </div>
-            <div class="span2"> <span class="slider-label">Number of Students:</span> <span id="numStudents" class="slider-range">0 - 6545</span>
-                <div id="studentSlider" class="slider"></div>
-            </div>
-            <div class="span2"> <span class="slider-label">% Free Lunch Students:</span> <span id="lunchStudents" class="slider-range">0 - 100</span>
-                <div id="lunchStudentSlider" class="slider"></div>
-            </div>
-            <div class="span2"> <span class="slider-label">Max. Download Speed:</span> <span id="maxdownSpeed" class="slider-range">N/A - >1gbps</span>
-                <div id="maxdownSpeedSlider" class="slider"></div>
-            </div>
+    <div id="details" class="maps-filters row">
+        <div class="span6">
+            <h2 class="hd-map">Find schools by:</h2>
         </div>
-    <div id="details" class="maps-header row">
-        <div class="span6"><span id="txtSelection" class="hd-map"></span></div>
-        <div class="span6"><a id="reset" class="btn btn-small pull-right">Reset</a></div>
+        <div class="span6"><a id="reset" class="btn-reset btn btn-mini pull-right">Reset Filters</a></div>
+    </div>
+    <div class="row">
+        <div class="span2">
+            <label for="type">School Type:</label>
+            <select id="type">
+            </select>
+        </div>
+        <div class="span2">
+            <label for="level">School Level:</label>
+            <select id="level">
+            </select>
+        </div>
+        <div class="span2">
+            <label for="locality">School Locality:</label>
+            <select id="locality">
+            </select>
+        </div>
+        <div class="span2"> <span class="slider-label">Number of Students:</span> <span id="numStudents" class="slider-range">0 - 6545</span>
+            <div id="studentSlider" class="slider"></div>
+        </div>
+        <div class="span2"> <span class="slider-label">% Free Lunch Students:</span> <span id="lunchStudents" class="slider-range">0 - 100</span>
+            <div id="lunchStudentSlider" class="slider"></div>
+        </div>
+        <div class="span2"> <span class="slider-label">Max. Available Speed:</span> <span id="maxdownSpeed" class="slider-range">N/A - >1gbps</span>
+            <div id="maxdownSpeedSlider" class="slider"></div>
+        </div>
     </div>
     <div class="maps">
         <div class="row">
             <div id="map-container">
-           
                 <div id="map"></div>
             </div>
-            <div id="map-sidebar">
-            <span class="hd-map-sidebar pull-right">Top 50 U.S. Schools</span>
+            <div id="map-sidebar"> <span class="hd-map-sidebar pull-right">First 100 US Schools</span>
                 <div id="detailmap" class="pull-right"></div>
             </div>
         </div>
     </div>
     <div class="maps-footer row">
         <div class="span12">
-            <div class="row">
+            <div class="table-hd row">
                 <div class="span6">
                     <div id="recordSection">
-                        <label class="hd-table" for="tableFilter" id="tableFilterTxt">Top 50 U.S. Schools Based on </label>
+                        <h3 id="txtSelection" class="hd-map"></h3>
+                    </div>
+                </div>
+                <div class="span6">
+                    <div id="tble-filter" class="pull-right hide">
+                        <label for="tableFilter" class="lbl-filterBy">Filter first 100 results by: </label>
                         <select id="tableFilter">
                         </select>
                     </div>
