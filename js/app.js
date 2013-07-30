@@ -216,10 +216,20 @@ function reset(resetType){
        // d3.selectAll('.circleKey').remove();
         d3.selectAll(".pulse_circle").remove();
         d3.select("#contents").html("");
-        d3.select("#recordSection").style("display","none");
+       
 		d3.select("#tble-filter").style("display","none");
         /*d3.select("#resetSection").style("display","none");*/
-        d3.select("#txtSelection").text("0 schools selected out of " + data.size()); 
+		
+		if (data.member.top(Infinity).length == 0) {
+			d3.select("#recordSection").style("display","block");			
+		} else {
+			 d3.select("#recordSection").style("display","none");	
+		}
+		
+        d3.select("#txtSelection").text("0 schools found out of " + format(data.size())); 
+		
+		
+		
         lmap.setView([39.5, -98.5], 3);
 }
 
@@ -530,7 +540,7 @@ function drawCircleKey(){
         data.member.top(Infinity).forEach(function(d) {
               context.fillRect(d.x, d.y, renderSize, renderSize);
         })
-        d3.select("#txtSelection").text(format(data.member.top("Infinity").length) + " schools found out of " + data.size());
+        d3.select("#txtSelection").text(format(data.member.top("Infinity").length) + " schools found out of " + format(data.size()));
         drawBubbles();
         d3.select("#recordSection").style("display", "block");
 		d3.select("#tble-filter").style("display", data.member.top("Infinity").length>filterNumber?"block":"none");
